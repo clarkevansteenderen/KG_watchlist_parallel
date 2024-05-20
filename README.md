@@ -67,18 +67,18 @@ Ensure that you are running this R script on a computer that has uninterrupted I
 
 Below is an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters.
 
-``SPECIES LIST PATH``	griis_data/griis_full_database.csv
-``ENDEMICS LIST PATH``	mau_endemics/native_flowering_plants_mau.txt
-``KOPPEN-GEIGER RASTER PATH``	koppen_geiger/Beck_KG_V1_present_0p0083.tif
-``TARGET COUNTRY``	Mauritius
-``KINGDOM``	Plantae
-``ISO COUNTRY CODE``	MU
-``SPECIES NAME COLUMN``	accepted_name.species
-``ENDEMICS NAME COLUMN``	full.tax.name
-``KOPPEN-GEIGER ZONES``	1, 2, 3, 14
-``OUTPUT FILE NAME``	final_sp_table.csv
-``KEEP DOWNLOADS``	n
-``NUMBER OF SPECIES TO PROCESS``  		
+``SPECIES LIST PATH``	griis_data/griis_full_database.csv    
+``ENDEMICS LIST PATH``	mau_endemics/native_flowering_plants_mau.txt    
+``KOPPEN-GEIGER RASTER PATH``	koppen_geiger/Beck_KG_V1_present_0p0083.tif    
+``TARGET COUNTRY``	Mauritius    
+``KINGDOM``	Plantae    
+``ISO COUNTRY CODE``	MU    
+``SPECIES NAME COLUMN``	accepted_name.species    
+``ENDEMICS NAME COLUMN``	full.tax.name    
+``KOPPEN-GEIGER ZONES``	1, 2, 3, 14    
+``OUTPUT FILE NAME``	final_sp_table.csv    
+``KEEP DOWNLOADS``	n    
+``NUMBER OF SPECIES TO PROCESS``  		  
 
 ## 🐛 spp.file.path -> the list of species of interest
 
