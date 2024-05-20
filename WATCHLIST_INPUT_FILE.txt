@@ -1,0 +1,20 @@
+***WATCHLIST INPUT FILE***
+# Change details where appropriate
+# Separate Koppen-Geiger zones with a comma as shown in the example below
+# If no endemic species list is available, leave the ENDEMICS LIST PATH and ENDEMICS NAME COLUMN blank
+# Leave NUMBER OF SPECIES TO PROCESS blank to run all species	
+# To run the script from the command line:  	
+# for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
+
+SPECIES LIST PATH	griis_data/griis_full_database.csv
+ENDEMICS LIST PATH	mau_endemics/native_flowering_plants_mau.txt
+KOPPEN-GEIGER RASTER PATH	koppen_geiger/Beck_KG_V1_present_0p0083.tif
+TARGET COUNTRY	Mauritius
+KINGDOM	Plantae
+ISO COUNTRY CODE	MU
+SPECIES NAME COLUMN	accepted_name.species
+ENDEMICS NAME COLUMN	full.tax.name
+KOPPEN-GEIGER ZONES	1, 2, 3, 14
+OUTPUT FILE NAME	final_sp_table.csv
+KEEP DOWNLOADS	n
+NUMBER OF SPECIES TO PROCESS		
