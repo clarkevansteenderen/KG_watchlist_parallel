@@ -35,18 +35,18 @@ Makhanda/Grahamstown
 
 This collection of R scripts follows the pipeline below:
 
-* Input an Excel file containing a list of the genus and species names of invasive organisms of interest
-* Supply the name of a country that is under potential threat from these species (focal country) 
-* Remove all species already recorded in the focal country, and endemic species from the list    
-* The list of species will be divided into 48 smaller subsets to enable parallel processing     
-* Input a list of the Köppen-Geiger zones present in the focal country (target zones)    
-* Download all occurence records from GBIF for the taxa in the input list    
-* Extract the KG climate zone for each occurence record (GPS location)   
-* Score whether the KG zones where the [invasive] species occur are shared with the KG zones present in the focal country (0 or 1)  
-* Score the total number of records per species that share a KG zone with the focal country, and the overall proporpion      
-* Score the total, and proportion of, records present in each target KG zone, and also record whether there are any records from the focal country already    
-* Output a single summary table  
-* A logfile will be written to the directory, called ``LOGFILE.txt``, which will display a list of any species names where errors occurred. These species are skipped.
+* Input an Excel file containing a list of the genus and species names of invasive organisms of interest    
+* Supply the name of a country that is under potential threat from these species (focal country)     
+* Remove all species already recorded in the focal country, and endemic species from the list      
+* The list of species will be divided into 48 smaller subsets to enable parallel processing       
+* Input a list of the Köppen-Geiger zones present in the focal country (target zones)      
+* Download all occurence records from GBIF for the taxa in the input list      
+* Extract the KG climate zone for each occurence record (GPS location)     
+* Score whether the KG zones where the [invasive] species occur are shared with the KG zones present in the focal country (0 or 1)    
+* Score the total number of records per species that share a KG zone with the focal country, and the overall proporpion        
+* Score the total, and proportion of, records present in each target KG zone, and also record whether there are any records from the focal country already      
+* Output a single summary table    
+* A logfile will be written to the directory, called ``LOGFILE.txt``, which will display a list of any species names where errors occurred. These species are skipped.  
 
 ## Troubleshooting
 
