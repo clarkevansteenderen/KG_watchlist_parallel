@@ -25,6 +25,7 @@ Makhanda/Grahamstown
 ## :spider: Run instructions
 
 * Download this GitHub repository, and unzip the project folder
+* Edit the **``WATCHLIST_INPUT_FILE.txt``** according to the specific project requirements    
 * Upload the project folder to your High Performance Computer (HPC) of choice
 * Access a node of the HPC that has access to the Internet (since GBIF downloads require an Internet connection), e.g ``ssh cvansteenderen@globus.chpc.ac.za``
 * cd to the relevant directory on your HPC profile
@@ -65,7 +66,7 @@ Ensure that you are running this R script on a computer that has uninterrupted I
 
 ## 🐝 Input file
 
-Below is an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters.
+Below is an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list csv file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure the same for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything you like - just make sure that the relevant data is available where you have specified.
 
 ``SPECIES LIST PATH``	griis_data/griis_full_database.csv    
 ``ENDEMICS LIST PATH``	mau_endemics/native_flowering_plants_mau.txt    
