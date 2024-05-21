@@ -53,6 +53,107 @@ Rscript divide_data.R
 for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
 ```
 
+Which will appear as something like this:
+
+```
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+clarke@DESKTOP-QOA94I2:~$ ssh cvansteenderen@globus.chpc.ac.za
+cvansteenderen@globus.chpc.ac.za's password:
+Last login: Tue May 21 18:06:54 2024 from 8ta-246-129-164.telkomadsl.co.za
+[cvansteenderen@globus ~]$ cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated
+[cvansteenderen@globus kg_watchlist_MULTI_automated]$ module load chpc/BIOMODULES R/4.2.0
+[cvansteenderen@globus kg_watchlist_MULTI_automated]$ export LANG=en_US.UTF-8
+[cvansteenderen@globus kg_watchlist_MULTI_automated]$ export LC_ALL=en_US.UTF-8
+[cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript divide_data.R
+── Attaching packages ─────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.2 ──
+✔ ggplot2 3.5.0     ✔ purrr   1.0.2
+✔ tibble  3.2.1     ✔ dplyr   1.1.4
+✔ tidyr   1.3.1     ✔ stringr 1.5.1
+✔ readr   2.1.5     ✔ forcats 0.5.2
+── Conflicts ────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+
+Attaching package: ‘magrittr’
+
+The following object is masked from ‘package:purrr’:
+
+    set_names
+
+The following object is masked from ‘package:tidyr’:
+
+    extract
+
+Rows: 107045 Columns: 16
+── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────
+Delimiter: ","
+chr (15): scientific_name, scientific_name_type, kingdom, establishment_mean...
+lgl  (1): accepted_name
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 695 Columns: 20
+── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────
+Delimiter: "\t"
+chr (15): id, taxonID, scientificName, kingdom, phylum, class, order, family...
+lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+[cvansteenderen@globus kg_watchlist_MULTI_automated]$ for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
+[1] 31878
+[2] 31879
+[3] 31880
+[4] 31881
+[5] 31882
+[6] 31883
+[7] 31886
+[8] 31888
+[9] 31889
+[10] 31890
+[11] 31892
+[12] 31893
+[13] 31895
+[14] 31896
+[15] 31897
+[16] 31899
+[17] 31900
+[18] 31901
+[19] 31902
+[20] 31903
+[21] 31904
+[22] 31905
+[23] 31906
+[24] 31907
+[25] 31908
+[26] 31909
+[27] 31910
+[28] 31911
+[29] 31913
+[30] 31914
+[31] 31915
+[32] 31916
+[33] 31917
+[34] 31918
+[35] 31920
+[36] 31921
+[37] 31922
+[38] 31923
+[39] 31924
+[40] 31925
+[41] 31926
+[42] 31927
+[43] 31928
+[44] 31929
+[45] 31930
+[46] 31931
+[47] 31932
+[48] 31933
+[cvansteenderen@globus kg_watchlist_MULTI_automated]$
+```
+
 ## 🪲 Workflow
 
 This collection of R scripts follows the pipeline below:
