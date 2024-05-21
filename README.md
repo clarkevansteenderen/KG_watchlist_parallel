@@ -1,7 +1,5 @@
-# KG Watchlist: Parallel Processing
-
-# Köppen-Geiger watchlist 🗺️
-### Broad-scale Köppen-Geiger (KG) based climate matching to prioritise invasive species
+# Köppen-Geiger watchlist: Parallel Processing 🗺️
+### Broad-scale Köppen-Geiger (KG) based climate matching to prioritise invasive species and generate watchlists
 
 -------------------------------------
 
