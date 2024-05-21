@@ -26,28 +26,28 @@ Makhanda/Grahamstown
 
 * Download this GitHub repository, and unzip the project folder
 * Edit the **``WATCHLIST_INPUT_FILE.txt``** according to the specific project requirements    
-* Upload the project folder to your High Performance Computer (HPC) of choice
+* Upload the project folder to your profile on a High Performance Computer (HPC) of choice
 * Access a node of the HPC that has access to the Internet (since GBIF downloads require an Internet connection), e.g ``ssh cvansteenderen@globus.chpc.ac.za``
 * cd to the relevant directory on your HPC profile
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
-* Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done``
+* Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` in the console
 
 ## 🪲 Workflow
 
 This collection of R scripts follows the pipeline below:
 
-* Input an Excel file containing a list of the genus and species names of invasive organisms of interest    
-* Supply the name of a country that is under potential threat from these species (focal country)     
-* Remove all species already recorded in the focal country, and endemic species from the list      
+* Input an Excel file containing a list of the genus and species names of invasive organisms of interest (e.g. from the Global Register of Introduced and Invasive Species [GRIIS](https://griis.org/) database)    
+* Input the name of a country that is under potential threat from these species (focal country)     
+* Remove all (1) all taxa already recorded in the focal country, and (2) endemic species (if available) from the list      
 * The list of species will be divided into 48 smaller subsets to enable parallel processing       
-* Input a list of the Köppen-Geiger zones present in the focal country (target zones)      
+* Input a list of the Köppen-Geiger zones present in the focal country      
 * Download all occurence records from GBIF for the taxa in the input list      
 * Extract the KG climate zone for each occurence record (GPS location)     
-* Score whether the KG zones where the [invasive] species occur are shared with the KG zones present in the focal country (0 or 1)    
+* Score whether the KG zones where the invasive species occur are shared with the KG zones present in the focal country (0 or 1)    
 * Score the total number of records per species that share a KG zone with the focal country, and the overall proporpion        
 * Score the total, and proportion of, records present in each target KG zone, and also record whether there are any records from the focal country already      
 * Output a single summary table    
-* A logfile will be written to the directory, called ``LOGFILE.txt``, which will display a list of any species names where errors occurred. These species are skipped.  
+* A logfile will be written to the directory, called ``SKIPPED_SP_LOGFILE.txt``, which will display a list of any species names where errors occurred. These species are skipped.  
 
 ## Troubleshooting
 
@@ -66,7 +66,24 @@ Ensure that you are running this R script on a computer that has uninterrupted I
 
 ## 🐝 Input file
 
-Below is an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list csv file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure the same for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything you like - just make sure that the relevant data is available where you have specified.
+Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list csv file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure the same for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything you like - just make sure that the relevant data is available where you have specified.
+
+### Template WATCHLIST_INPUT_FILE.txt
+
+``SPECIES LIST PATH``	path/to/invasive_species_list.csv    
+``ENDEMICS LIST PATH``	path/to/list_of_endemics.txt    
+``KOPPEN-GEIGER RASTER PATH``	path/to/koppengeiger/shapefile/Beck_KG_V1_present_0p0083.tif    
+``TARGET COUNTRY``	country    
+``KINGDOM``	taxonomic kingdom   
+``ISO COUNTRY CODE``	country code (see ISO codes below)          
+``SPECIES NAME COLUMN``	column in invasive species list specifying full taxonomic name (genus and species)       
+``ENDEMICS NAME COLUMN``	column in endemic species list specifying full taxonomic name (genus and species)    
+``KOPPEN-GEIGER ZONES``	koppen-geiger zone numbers (see table below), separated by a comma    
+``OUTPUT FILE NAME``	name_of_output_table.csv    
+``KEEP DOWNLOADS``	whether to keep each GBIF download (y or n)        
+``NUMBER OF SPECIES TO PROCESS`` optional to specify the number of species to process for a test run. If left blank, defaults to all species in the list    
+
+### Example WATCHLIST_INPUT_FILE.txt
 
 ``SPECIES LIST PATH``	griis_data/griis_full_database.csv    
 ``ENDEMICS LIST PATH``	mau_endemics/native_flowering_plants_mau.txt    
@@ -81,7 +98,7 @@ Below is an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user n
 ``KEEP DOWNLOADS``	n    
 ``NUMBER OF SPECIES TO PROCESS``  		  
 
-## 🐛 spp.file.path -> the list of species of interest
+## 🐛 SPECIES LIST PATH -> the list of invasive species of interest
 
 In this example, the file ``griis_full_database.csv`` contains 3083 plant species names that are a potential threat to Mauritius. The table below shows the first three species in this table. 
 
@@ -90,6 +107,16 @@ In this example, the file ``griis_full_database.csv`` contains 3083 plant specie
 | Abelmoschus moschatus | species              | Plantae | alien               | invasive    | present           | Cook Islands   | COK                              | Abelmoschus moschatus | Plantae               | Tracheophyta         | Magnoliopsida       | Malvales            | Malvaceae            | ["terrestrial"]       | NA            |
 | Abies alba Mill.      | species              | Plantae | alien               | invasive    | present           | Sweden         | SWE                              | Abies alba            | Plantae               | Tracheophyta         | Pinopsida           | Pinales             | Pinaceae             | ["terrestrial"]       | NA            |
 | Abrus precatorius L.  | species              | Plantae | alien               | invasive    | present           | Bahamas        | BHS                              | Abrus precatorius     | Plantae               | Tracheophyta         | Magnoliopsida       | Fabales             | Fabaceae             | ["terrestrial"]       | NA            |
+
+## 🐛 ENDEMIC SPECIES LIST PATH -> the list of endemic taxa in the focal country
+
+In this example, the file ``native_flowering_plants_mau.txt`` contains 695 endemic flowering plant species names that endemic to Mauritius, taken from [GBIF](https://www.gbif.org/dataset/649fb99c-5bb1-4a3b-83df-7f9b3fe4dca6#description). The table below shows the first three species in this table. The column ``full.tax.name`` was created manually here to provide an input that contains the genus and species together.
+
+| id | taxonID | acceptedNameUsageID | scientificName | namePublishedIn | namePublishedInYear | kingdom | phylum | class | order | family | genus | specificEpithet | full.tax.name | taxonRank | scientificNameAuthorship | vernacularName | taxonomicStatus |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| MUS_001 | MUS_001 |  | Barleria observatrix Bosser &   Heine |  |  | Plantae | Tracheophyta | Magnoliopsida | Lamiales | Acanthaceae | Barleria | observatrix | Barleria observatrix | species | Bosser & Heine |  | accepted |
+| MUS_002 | MUS_002 |  | Dicliptera falcata (Lam.) Bosser   & Heine |  |  | Plantae | Tracheophyta | Magnoliopsida | Lamiales | Acanthaceae | Dicliptera | falcata | Dicliptera falcata | species | (Lam.) Bosser & Heine |  | accepted |
+| MUS_003 | MUS_003 |  | Hypoestes serpens (Vahl)  R. Br. |  |  | Plantae | Tracheophyta | Magnoliopsida | Lamiales | Acanthaceae | Hypoestes | serpens | Hypoestes serpens | species | (Vahl)  R. Br. |  | accepted |
 
 ## 🍁 ISO country codes
 
@@ -139,9 +166,9 @@ Nature Scientific Data, 2018.
 
 ## 🦤 Example output
 
-In the example, two species are to be run from the input file, where the focal country is Mauritius (``MU``). The KG zones in this country are ``1, 2, 3, 14``, which correspond to Af (tropical rainforest), Am (tropical monsoon), Aw (tropical savannah), and Cfa (humid subtropical), respectively.
+In the example, the focal country is Mauritius (``MU``). The KG zones in this country are ``1, 2, 3, 14``, which correspond to Af (tropical rainforest), Am (tropical monsoon), Aw (tropical savannah), and Cfa (humid subtropical), respectively.
 
-An example output table might be:
+An example output **final_sp_table.csv** might be (showing just the first two species):
 
 | species | total_n | total_records_in_kg | prop_records_in_kg | total_records_in_1 | prop_records_in_1 | total_records_in_2 | prop_records_in_2 | total_records_in_3 | prop_records_in_3 | total_records_in_14 | prop_records_in_14 | total_records_in_15 | prop_records_in_15 | n_records_in_target_countries | citation | mins | size.mb |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
