@@ -51,7 +51,7 @@ This collection of R scripts follows the pipeline below:
 
 ## 👓 Code layout
 
-* The ``KG_run.R`` file is the main script that is run from the console. This file calls the following scripts in order to complete the analysis:
+* The ``KG_run.R`` file is the main script that is run from the console. This file first calls the following scripts before running the analysis:
     * ``divide_data.R`` - reads in the **``WATCHLIST_INPUT_FILE.txt``** file and sets all the required user parameters, divides the invasive species list into 48 subsets, and allocates each data subset to a different RUN folder. Each RUN folder also gets its own **``INPUT.csv``** folder, specifying the path to the data subset, GBIF credentials to enable downloading, and other parameters specified in the **``WATCHLIST_INPUT_FILE.txt``** as edited by the user
     * ``KG_run_setup.R`` - loads up the necessary libraries, reads in the input parameter file (**``INPUT.csv``**) and Köppen-Geiger shape file, creates output folders, and sets up the dataframes required for the analysis
     * ``combine_output.R`` - combines the output from all 48 parallel runs back into one CSV file
