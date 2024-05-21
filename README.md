@@ -51,7 +51,6 @@ export LC_ALL=en_US.UTF-8
 Rscript divide_data.R
 # run the analysis, such that all 48 subsets are running in parallel
 for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
-
 ```
 
 ## 🪲 Workflow
