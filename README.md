@@ -28,10 +28,10 @@ Makhanda/Grahamstown
 * Edit the **``WATCHLIST_INPUT_FILE.txt``** according to the specific project requirements    
 * Upload the project folder to your profile on a High Performance Computer (HPC) of choice
 * Access a node of the HPC that has access to the Internet (since GBIF downloads require an Internet connection), e.g ``ssh cvansteenderen@globus.chpc.ac.za``
-* cd to the relevant directory on your HPC profile
+* cd (change the directory) to the relevant folder/directory on your HPC profile
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
-* Run ``Rscript divide_data.R``
-* Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` in the console
+* Run ``Rscript divide_data.R`` to divide the invasive species list into 48 subsets
+* Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis
 
 An example of the console input could be:      
 
