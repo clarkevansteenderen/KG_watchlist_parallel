@@ -56,6 +56,8 @@ This collection of R scripts follows the pipeline below:
     * ``KG_run_setup.R`` - loads up the necessary libraries, reads in the input parameter file (**``INPUT.csv``**) and Köppen-Geiger shape file, creates output folders, and sets up the dataframes required for the analysis
     * ``combine_output.R`` - combines the output from all 48 parallel runs back into one CSV file
 
+💡The only file that the user needs to change is **``WATCHLIST_INPUT_FILE.txt``**. If specific changes need to be made to the filtering of the invasive species list before it is divided into 48 subsets (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia)
+
 ## Troubleshooting
 
 ⚠️ There may be times when the GBIF database is down or experiencing errors. For example, the error:    
