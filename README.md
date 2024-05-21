@@ -171,6 +171,8 @@ This collection of R scripts follows the pipeline below:
 * Output a single summary table    
 * A logfile will be written to the directory, called ``SKIPPED_SP_LOGFILE.txt``, which will display a list of any species names where errors occurred. These species are skipped.
 
+<img src="workflow.png" width="800">
+
 ## 👓 Code layout
 
 * The ``KG_run.R`` and ``divide_data.R`` files are the main scripts that are run from the console. 
