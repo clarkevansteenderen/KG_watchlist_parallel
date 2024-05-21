@@ -308,7 +308,8 @@ round(p/num_species_to_process*100, 2), "% complete."))
   
   if(length(error.log) > 0){
     write.table(error.log.sp.list,
-                file = paste0("RUNS/", arg, "/results/SKIPPED_SP_LOGFILE.txt"), 
+                file = paste0("RUNS/", arg, 
+                              "/results/summary/SKIPPED_SP_LOGFILE.txt"), 
                 col.names = F, row.names = F, 
                 quote = F)
   }#if
@@ -356,3 +357,6 @@ output_file_path = paste0(paste0("RUNS/", arg, "/results/summary/"), output_file
 write_csv(super_table, output_file_path)
 
 message(paste0("\nOutput file written to ", output_file_path))
+
+# combine all the results from each subset into one output file
+source("combine_output.R")

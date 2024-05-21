@@ -44,6 +44,7 @@ target.country = filter(input.params,
                         row.names(input.params) %in% 
                         c("TARGET COUNTRY"))$choice
 
+# this might need to be ignored, depending on the desired outcome
 target.kingdom = filter(input.params,
                         row.names(input.params) %in% 
                         c("KINGDOM"))$choice
