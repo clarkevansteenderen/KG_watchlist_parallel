@@ -1,5 +1,4 @@
 
-source("divide_data.R")
 source("KG_run_setup.R")
 
 #########################################################################
@@ -68,7 +67,7 @@ round(p/num_species_to_process*100, 2), "% complete."))
     rgbif::occ_download_wait(gbif_download) 
     
     result = rgbif::occ_download_get(key = gbif_download, overwrite = FALSE,
-                                     path = paste0(arg, "/data/zip/"))
+                                     path = paste0("RUNS/", arg, "/data/zip/"))
     
     
     # check the size of the downloaded folder -> convert from bytes to MB
