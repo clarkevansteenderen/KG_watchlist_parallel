@@ -30,7 +30,29 @@ Makhanda/Grahamstown
 * Access a node of the HPC that has access to the Internet (since GBIF downloads require an Internet connection), e.g ``ssh cvansteenderen@globus.chpc.ac.za``
 * cd to the relevant directory on your HPC profile
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
+* Run ``Rscript divide_data.R``
 * Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` in the console
+
+An example of the console input could be:      
+
+```
+# ssh into the globus node
+ssh cvansteenderen@globus.chpc.ac.za 
+# password 
+Cryophytum2024@!
+# change working directory
+cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated
+# add the relevant R module
+module load chpc/BIOMODULES R/4.2.0
+# type this to do away with warnings on startup of R
+export LANG=en_US.UTF-8 
+export LC_ALL=en_US.UTF-8
+# divide the data in 48 subsets, and set up the analysis
+Rscript divide_data.R
+# run the analysis, such that all 48 subsets are running in parallel
+for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
+
+```
 
 ## 🪲 Workflow
 
@@ -51,10 +73,10 @@ This collection of R scripts follows the pipeline below:
 
 ## 👓 Code layout
 
-* The ``KG_run.R`` file is the main script that is run from the console. This file first calls the following scripts before running the analysis:
-    * ``divide_data.R`` - reads in the **``WATCHLIST_INPUT_FILE.txt``** file and sets all the required user parameters, divides the invasive species list into 48 subsets, and allocates each data subset to a different RUN folder. Each RUN folder also gets its own **``INPUT.csv``** folder, specifying the path to the data subset, GBIF credentials to enable downloading, and other parameters specified in the **``WATCHLIST_INPUT_FILE.txt``** as edited by the user
-    * ``KG_run_setup.R`` - loads up the necessary libraries, reads in the input parameter file (**``INPUT.csv``**) and Köppen-Geiger shape file, creates output folders, and sets up the dataframes required for the analysis
-    * ``combine_output.R`` - combines the output from all 48 parallel runs back into one CSV file
+* The ``KG_run.R`` and ``divide_data.R`` files are the main scripts that are run from the console. 
+* ``divide_data.R`` reads in the **``WATCHLIST_INPUT_FILE.txt``** file and sets all the required user parameters, divides the invasive species list into 48 subsets, and allocates each data subset to a different RUN folder. Each RUN folder also gets its own **``INPUT.csv``** folder, specifying the path to the data subset, GBIF credentials to enable downloading, and other parameters specified in the **``WATCHLIST_INPUT_FILE.txt``** as edited by the user.
+* ``KG_run_setup.R`` is called by ``KG_run.R``, and loads up the necessary libraries, reads in the input parameter file (**``INPUT.csv``**) and Köppen-Geiger shape file, creates output folders, and sets up the dataframes required for the analysis
+* ``combine_output.R`` is also called by ``KG_run.R``, and combines the output from all 48 parallel runs back into one CSV file
 
 💡The only file that the user needs to change is **``WATCHLIST_INPUT_FILE.txt``**. If specific changes need to be made to the filtering of the invasive species list before it is divided into 48 subsets (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``divide_data.R`` file.
 
