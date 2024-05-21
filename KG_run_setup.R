@@ -164,20 +164,20 @@ download_records = function(taxon_key) {
 # no longer exist
 #########################################################################
 
-if (!dir.exists(paste0(arg, "/data"))) {
-  dir.create(paste0(arg, "/data"))
+if (!dir.exists(paste0("RUNS/", arg, "/data"))) {
+  dir.create(paste0("RUNS/", arg, "/data"))
 }
 
-if (!dir.exists(paste0(arg, "/data/zip"))) {
-  dir.create(paste0(arg, "/data/zip"))
+if (!dir.exists(paste0("RUNS/", arg, "/data/zip"))) {
+  dir.create(paste0("RUNS/", arg, "/data/zip"))
 }
 
-if (!dir.exists(paste0(arg, "/results"))) {
-  dir.create(paste0(arg, "/results"))
+if (!dir.exists(paste0("RUNS/", arg, "/results"))) {
+  dir.create(paste0("RUNS/", arg, "/results"))
 }
 
-if (!dir.exists(paste0(arg, "/results/summary"))) {
-  dir.create(paste0(arg, "/results/summary"))
+if (!dir.exists(paste0("RUNS/", arg, "/results/summary"))) {
+  dir.create(paste0("RUNS/", arg, "/results/summary"))
 }
 
 #########################################################################
