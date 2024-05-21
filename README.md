@@ -152,6 +152,8 @@ lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
 [cvansteenderen@globus kg_watchlist_MULTI_automated]$
 ```
 
+The list of numbers from [1] to [48] are job numbers allocated by the HPC.
+
 ## 🪲 Workflow
 
 This collection of R scripts follows the pipeline below:
