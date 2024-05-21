@@ -74,7 +74,7 @@ This collection of R scripts follows the pipeline below:
 
 * The ``KG_run.R`` and ``divide_data.R`` files are the main scripts that are run from the console. 
 * ``divide_data.R`` reads in the **``WATCHLIST_INPUT_FILE.txt``** file and sets all the required user parameters, divides the invasive species list into 48 subsets, and allocates each data subset to a different RUN folder. Each RUN folder also gets its own **``INPUT.csv``** folder, specifying the path to the data subset, GBIF credentials to enable downloading, and other parameters specified in the **``WATCHLIST_INPUT_FILE.txt``** as edited by the user.
-* ``KG_run_setup.R`` is called by ``KG_run.R``, and loads up the necessary libraries, reads in the input parameter file (**``INPUT.csv``**) and Köppen-Geiger shape file, creates output folders, and sets up the dataframes required for the analysis
+* ``KG_run_setup.R`` is called by ``KG_run.R``, and loads up the necessary libraries, reads in the input parameter file (**``INPUT.csv``**), creates output folders, and sets up the dataframes required for the analysis
 * ``combine_output.R`` is also called by ``KG_run.R``, and combines the output from all 48 parallel runs back into one CSV file
 
 💡The only file that the user needs to change is **``WATCHLIST_INPUT_FILE.txt``**. If specific changes need to be made to the filtering of the invasive species list before it is divided into 48 subsets (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``divide_data.R`` file.
@@ -101,8 +101,7 @@ Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file 
 ### Template WATCHLIST_INPUT_FILE.txt
 
 ``SPECIES LIST PATH``	path/to/invasive_species_list.csv    
-``ENDEMICS LIST PATH``	path/to/list_of_endemics.txt    
-``KOPPEN-GEIGER RASTER PATH``	path/to/koppengeiger/shapefile/Beck_KG_V1_present_0p0083.tif    
+``ENDEMICS LIST PATH``	path/to/list_of_endemics.txt        
 ``TARGET COUNTRY``	country    
 ``KINGDOM``	taxonomic kingdom   
 ``ISO COUNTRY CODE``	country code (see ISO codes below)          
@@ -116,8 +115,7 @@ Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file 
 ### Example WATCHLIST_INPUT_FILE.txt
 
 ``SPECIES LIST PATH``	griis_data/griis_full_database.csv    
-``ENDEMICS LIST PATH``	mau_endemics/native_flowering_plants_mau.txt    
-``KOPPEN-GEIGER RASTER PATH``	koppen_geiger/Beck_KG_V1_present_0p0083.tif    
+``ENDEMICS LIST PATH``	mau_endemics/native_flowering_plants_mau.txt        
 ``TARGET COUNTRY``	Mauritius    
 ``KINGDOM``	Plantae    
 ``ISO COUNTRY CODE``	MU    
