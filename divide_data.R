@@ -122,13 +122,13 @@ if(endemics.list.path != ""){
 endemics.list = endemics.list %>%
   dplyr::distinct(. , endemics.list[[endemics.spp.name.col]], .keep_all = TRUE)
 
-# remove species in the endemics list FROM the "griis.other.filtered" list
-griis.other.filtered = griis.other.filtered %>%
-  dplyr::filter(! accepted_name.species %in% endemics.list[[endemics.spp.name.col]])
-
 # store the native species that were in the griis list (and now removed)
 endemics_in_griis_list = griis.other.filtered %>%
   dplyr::filter(accepted_name.species %in% endemics.list[[endemics.spp.name.col]])
+
+# remove species in the endemics list FROM the "griis.other.filtered" list
+griis.other.filtered = griis.other.filtered %>%
+  dplyr::filter(! accepted_name.species %in% endemics.list[[endemics.spp.name.col]])
 
 }# if
 
