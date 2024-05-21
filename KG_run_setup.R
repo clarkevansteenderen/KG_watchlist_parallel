@@ -1,3 +1,33 @@
+##################################################################
+##                         CODE RUNDOWN                         ##
+##################################################################
+
+# This script sets everything up for the analysis to start running, and is
+# sourced by the KG_run.R script. 
+# It first specifies the relevant RUNS/RUN(n) folder in which to fetch the
+# input invasive species list (subsetted) and the INPUT.csv file with the 
+# required input parameters provided by the user in the 
+# WATCHLIST_INPUT_FILE.txt file
+
+# The arg that is taken in is just a number, indicating the RUN(n)
+# subfolder number (e.g. RUNS/RUN1, or RUNS/RUN48). This is needed when this
+# script is run from the command line. For example:
+# > Rscript KG_run.R 1
+
+# The koppen-geiger shape file is read in, as well as the subsetted species
+# list present in that particular RUNS/RUN(n) folder
+
+# The rest of the script sets up the data frame with its necessary columns
+# to which the summary data will be written as the loop progresses through
+# all the species names in the list
+
+# A download_records function is declared to access the GBIF data for each
+# species as the loop progresses, and a log file is declared to store species
+# where errors occurred and the download was skipped
+
+# Folders are written: data/zip and results/summary, into which both temporary
+# and permanent output files are written
+
 #########################################################################
 # Session setup 1
 #########################################################################
@@ -18,9 +48,9 @@ library(purrr)
 
 # when this script is run from the command line, take in a parameter to 
 # specify the folder you want to run, example the RUN1 folder:
-#    >     Rscript KG_run.R RUN1
+#    >     Rscript KG_run.R 1
 # on the HPC:
-#    >     nohup R -f KG_run.R 1 &> RUNS/RUN1/RUN1.out &
+#    >     nohup Rscript KG_run.R 1 &> RUNS/RUN1/RUN1.out &
 # change 1 to 2, 3, etc
 # just make sure that the INPUT.csv folder is always called INPUT.csv and not 
 # changed!
@@ -139,25 +169,6 @@ download_records = function(taxon_key) {
     email = user.input$gbif.email[1]
   )
 }
-
-#########################################################################
-# Function to estimate how much time is left to complete the task
-#########################################################################
-
-# time_estimate = function(index){
-#   # Get the first and last file paths directly without storing all paths
-#   first_path <- list.files("data/zip/", full.names = TRUE, pattern = NULL)[index - 1]
-#   last_path <- list.files("data/zip/", full.names = TRUE, pattern = NULL)[index]
-#   time1 = as.POSIXct( file.info(first_path)$ctime )
-#   time2 = as.POSIXct( file.info(last_path)$ctime )
-#   time_diff = difftime(time2, time1, units = "mins")
-#   num_files = length(list.files("data/zip/", full.names = FALSE, pattern = NULL))
-#   time_per_file = (as.numeric(time_diff))/num_files
-#   # return average time taken to download data for one species, in minutes
-#   return(time_per_file)
-# }
-
-#########################################################################
 
 #########################################################################
 # create these folders the first time the script is run, or if they

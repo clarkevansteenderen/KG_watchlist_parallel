@@ -1,4 +1,16 @@
+##################################################################
+##                         CODE RUNDOWN                         ##
+##################################################################
 
+# Each RUNS/RUN(n)/results/summary folder contains the final output table,
+# and the log file for the run on each of the 48 subsets. This script fetches
+# these output files from each of the 48 folders, and combines them back into
+# one. The resulting species watchlist CSV file, and log file are written to the
+# root folder as:
+# "watchlist_final.csv" and
+# "watchlist_logfile_final.csv"
+
+##################################################################
 
 # Define the main directory
 main_dir = "RUNS/"

@@ -1,6 +1,40 @@
-#########################################################################
-# SETUP
-#########################################################################
+##################################################################
+##                         CODE RUNDOWN                         ##
+##################################################################
+
+# This script reads in the WATCHLIST_INPUT_FILE.txt file in the project directory,
+# and extracts the user's input parameters. This includes the file paths to
+# the global list of invasive species from GRIIS, and an optional list of
+# endemic species for the target country. Then:
+
+# (1) The full list of invasive species is filtered such that species are
+# removed that are already present in the target country, and that are natives
+
+# (2) The filtered list is divided into 48 subsets (since there are 16 email
+# addresses available, and each can download a maximum of three records at the
+# same time from GBIF: 16 * 3 = 48)
+
+# (3) A folder called RUNS is created, into which 48 empty folders are written
+# and named RUN1 up to RUN48 (i.e. RUNS/RUN1, RUNS/RUN2, etc.)
+# Each of the 48 [species list] subsets is then written into each corresponding
+# RUN(n) folder. I.e. RUNS/RUN1/watchlist_subset_1.csv, 
+# RUNS/RUN2/watchlist_subset_2.csv, and so on.
+
+# (4) Each RUNS/RUN(n) folder then also needs an INPUT.csv file, which contains 
+# input parameters that have been taken from the WATCHLIST_INPUT_FILE.txt file,
+# and GBIF account information (username, email address, and password).
+# This is done so that every three consecutive data subsets get the same GBIF 
+# user details
+
+# If more email addresses and associated GBIF accounts are added to these 16,
+# then modify the code accordingly so that the filtered dataset is divided
+# into more subsets (e.g. 20 email addresses means that the data can be divided
+# into subsets of 60 (20 x 3 downloads per user), rather than 48). Also add
+# to the vectors containing GBIF usernames, passwords, and email addresses
+
+#################################################################
+##                            SETUP                            ##
+#################################################################
 
 library(tidyverse)
 library(tidyr)
@@ -11,9 +45,9 @@ library(dplyr)
 # change the divide.dataset.into value from 48 if you add more email addresses
 # also then edit the usernames and email addresses
 
-################################################################################
-# GENERATE THE SPECIES LIST
-################################################################################
+#################################################################
+##                  GENERATE THE SPECIES LIST                  ##
+#################################################################
 
 # read in the input file with user-changed parameters
 input.params = read.delim("WATCHLIST_INPUT_FILE.txt", header = FALSE)
@@ -49,9 +83,9 @@ target.kingdom = filter(input.params,
                         row.names(input.params) %in% 
                         c("KINGDOM"))$choice
 
-###############################################################################
-# GENERATE CUSTOMISED FILES WITH INPUT PARAMETERS FOR EACH RUN
-###############################################################################
+####################################################################
+##  GENERATE CUSTOMISED FILES WITH INPUT PARAMETERS FOR EACH RUN  ##
+####################################################################
 
 # extract more info from the user's input file
 
@@ -80,9 +114,9 @@ num.spp = filter(input.params,
                  row.names(input.params) %in% 
                   c("NUMBER OF SPECIES TO PROCESS"))$choice
 
-#########################################################################
-# GENERATE SPECIES LIST 
-#########################################################################
+#################################################################
+##                  GENERATE SPECIES LIST                  ##
+#################################################################
 
 # Extract all the Mauritius records for Plantae that are invasive
 griis.target = dplyr::filter(griis.full, 
@@ -129,8 +163,8 @@ griis.other.filtered = griis.other.filtered %>%
 }# if
 
 #########################################################################
-# DIVIDE SPECIES LIST INTO SUBSETS - HERE IT IS SET TO 48 
-# BASED ON THE NUMBER OF EMAIL ADDRESSES AT OUR DISPOSAL
+##        DIVIDE SPECIES LIST INTO SUBSETS - HERE IT IS SET TO 48      ##
+##         BASED ON THE NUMBER OF EMAIL ADDRESSES AT OUR DISPOSAL      ##
 #########################################################################
 
 # Divide the griis.other dataset into subsets
@@ -198,7 +232,7 @@ for(p in dirnums){
 }
 
 #########################################################################
-# GENERATE CUSTOMISED INPUT.CSV FILES FOR EACH INDIVIDUAL RUN FOLDER
+## GENERATE CUSTOMISED INPUT.CSV FILES FOR EACH INDIVIDUAL RUN FOLDER  ##
 #########################################################################
 
 input.file.template = data.frame(matrix(ncol = 10))

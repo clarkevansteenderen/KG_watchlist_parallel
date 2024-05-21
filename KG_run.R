@@ -1,3 +1,35 @@
+##################################################################
+##                         CODE RUNDOWN                         ##
+##################################################################
+
+# This is the meat of the analysis, which kicks off a loop that goes through
+# each species name in the input file (subsetted invasive species list).
+# It then does the following:
+
+# (1) If available, downloads the data available on GBIF for that species, and
+# saves it temporarily in the data/zip folder
+
+# (2) The data folder is read back into the R environment and filtered 
+# (duplicates removed). A tally is kept of species already in the target country.
+# The GPS locality of each record in the data file is assigned to a 
+# Koppen-Geiger climate zone by number (e.g. Af = 1, Am = 2). These numbers are
+# then matched to the KG zones in the target country. If they are shared, a "1"
+# is assigned. If not, a "0" is recorded.
+
+# (3) A summary table is dynamically generated as each species name is processed
+# and scored, with totals and proportions of shared KG zones.
+
+# (4) After each iteration of a species, the R global environment is cleared of
+# large objects, and the zipped GBIF data folder is deleted from data/zip in 
+# order to save space
+
+# (5) Final output files (the watchlist itself and the log file) are written
+# to RUNS/RUN(n)/data/summary 
+
+# (6) The combine_output.R file is sourced to collate all outputs across the 48
+# folders and store them as one output and one log file
+
+##################################################################
 
 source("KG_run_setup.R")
 
@@ -103,14 +135,6 @@ round(p/num_species_to_process*100, 2), "% complete."))
       next
     } # if
     
-    ################################################
-    #parquet file seems the smallest! About half the size of its CSV version
-    # feath = arrow::arrow_table(species_files[[1]])
-    # arrow::write_feather(feath, "./data/zip/test.feather")
-    # arrow::write_parquet(feath, "./data/zip/test.parquet")
-    # test_read_parq = arrow::read_parquet("./data/zip/test.parquet", as_data_frame = TRUE)
-    ################################################
-    
     # ---------------------------------------------------------
     # Are any records already known from the target country/ies? 
     # ---------------------------------------------------------
@@ -184,13 +208,6 @@ round(p/num_species_to_process*100, 2), "% complete."))
       tidyr::drop_na(kg_zone) %>%
       dplyr::select(-c(ID))
     
-    # Classify the Koppen Geiger zones for the target country/ies
-    # Example: Mauritius and Reunion Zones
-    # - Mauritius has only zones:
-    #   - Tropical Monsoon (Am = zone 2),
-    #   - Tropical Rainforest (Af = zone 1), 
-    #   - Tropical Savanna (Aw = zone 3),
-    #   - Humid sub-tropical (Cfa = zone 14)
     
     # Classify if each GPS point lies in a KG zone present 
     # in the target country/ies
