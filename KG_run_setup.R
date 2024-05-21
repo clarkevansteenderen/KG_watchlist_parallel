@@ -54,7 +54,7 @@ keep.folders = user.input$keep.downloads %>%
 # Import KG map
 #########################################################################
 
-kg_map <- terra::rast(koppengeiger.raster.path)
+kg_map <- terra::rast("koppen_geiger/Beck_KG_V1_present_0p0083.tif")
 
 # Set the CRS projection for the current climate layers 
 # - Use the correct wkt CRS format 

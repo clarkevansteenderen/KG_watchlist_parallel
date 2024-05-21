@@ -49,10 +49,6 @@ target.kingdom = filter(input.params,
                         row.names(input.params) %in% 
                         c("KINGDOM"))$choice
 
-koppengeiger.raster.path = filter(input.params,
-                                  row.names(input.params) %in% 
-                                  c("KOPPEN-GEIGER RASTER PATH"))$choice
-
 ###############################################################################
 # GENERATE CUSTOMISED FILES WITH INPUT PARAMETERS FOR EACH RUN
 ###############################################################################

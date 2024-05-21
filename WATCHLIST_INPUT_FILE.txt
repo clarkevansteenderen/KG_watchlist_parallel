@@ -8,7 +8,6 @@
 
 SPECIES LIST PATH	griis_data/griis_full_database.csv
 ENDEMICS LIST PATH	mau_endemics/native_flowering_plants_mau.txt
-KOPPEN-GEIGER RASTER PATH	koppen_geiger/Beck_KG_V1_present_0p0083.tif
 TARGET COUNTRY	Mauritius
 KINGDOM	Plantae
 ISO COUNTRY CODE	MU
