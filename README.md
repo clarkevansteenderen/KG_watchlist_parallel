@@ -39,7 +39,7 @@ This collection of R scripts follows the pipeline below:
 * Input an Excel file containing a list of the genus and species names of invasive organisms of interest (e.g. from the Global Register of Introduced and Invasive Species [GRIIS](https://griis.org/) database)    
 * Input the name of a country that is under potential threat from these species (focal country)     
 * Remove all (1) all taxa already recorded in the focal country, and (2) endemic species (if available) from the list      
-* The list of species will be divided into 48 smaller subsets to enable parallel processing       
+* The list of species will be divided into 48 smaller subsets to enable parallel processing. Each GBIF user is only allowed three simultaneous downloads. To get around this, there are 16 available email addresses, as listed in the **``email_addresses.csv``** file. Using all at once means that 48 downloads can run concurrently (16 x 3). This is why the original invasive species list is divided into 48 subsets, where groups of three can be allocated to a single GBIF user account. Each of the 48 RUN folders will contain an INPUT.csv file, specifying which GBIF user account to draw from and the relevant login details.    
 * Input a list of the Köppen-Geiger zones present in the focal country      
 * Download all occurence records from GBIF for the taxa in the input list      
 * Extract the KG climate zone for each occurence record (GPS location)     
