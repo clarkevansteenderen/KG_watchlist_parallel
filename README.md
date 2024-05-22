@@ -20,6 +20,15 @@ Makhanda/Grahamstown
 
 -------------------------------------
 
+```mermaid
+  graph LR;
+      divide_data.R -->KG_run.R
+      KG_run.R --> check_output.R
+      KG_run.R -. reads in .->  KG_run_setup.R
+      check_output.R --> combine_output.R
+      combine_output.R --o watchlist.csv & logfile.csv
+```
+
 ## :spider: Run instructions
 
 * Download this GitHub repository, and unzip the project folder
