@@ -20,15 +20,6 @@ Makhanda/Grahamstown
 
 -------------------------------------
 
-```mermaid
-  graph LR;
-      divide_data.R -->KG_run.R
-      KG_run.R --> check_output.R
-      KG_run.R -. reads in .->  KG_run_setup.R
-      check_output.R --> combine_output.R
-      combine_output.R --o watchlist.csv & logfile.csv
-```
-
 ## :spider: Run instructions
 
 * Download this GitHub repository, and unzip the project folder
@@ -41,6 +32,15 @@ Makhanda/Grahamstown
 * Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis
 * Run ``check_output.R`` to see whether all the subsets completed successfully. If not, a list is returned of the folders that should be re-run
 * Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file
+
+```mermaid
+  graph LR;
+      divide_data.R -->KG_run.R
+      KG_run.R --> check_output.R
+      KG_run.R -. reads in .->  KG_run_setup.R
+      check_output.R --> combine_output.R
+      combine_output.R --o watchlist.csv & logfile.csv
+```
 
 An example of the console input could be:      
 
