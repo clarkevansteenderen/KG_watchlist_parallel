@@ -30,6 +30,7 @@ Makhanda/Grahamstown
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
 * Run ``Rscript divide_data.R`` to divide the invasive species list into 48 subsets
 * Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis
+* Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file
 
 An example of the console input could be:      
 
@@ -49,6 +50,8 @@ export LC_ALL=en_US.UTF-8
 Rscript divide_data.R
 # run the analysis, such that all 48 subsets are running in parallel
 for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
+# combine output
+Rscript combine_output.R
 ```
 
 Which will appear as something like this:
@@ -149,7 +152,7 @@ lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
 [46] 31931
 [47] 31932
 [48] 31933
-[cvansteenderen@globus kg_watchlist_MULTI_automated]$
+[cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript combine_output.R
 ```
 
 The list of numbers from [1] to [48] are job numbers allocated by the HPC.
