@@ -52,7 +52,7 @@ Rscript divide_data.R
 # run the analysis, such that all 48 subsets are running in parallel
 for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
 # check whether all folders contain output -> i.e. an output table was written to all
-Rscript check_data.R
+Rscript check_output.R
 # combine output if satisfied
 Rscript combine_output.R
 ```
@@ -177,7 +177,7 @@ export LC_ALL=en_US.UTF-8
 # run specific RUN folders
 for p in 23 32 37 38 46; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
 # check whether all folders contain output -> i.e. an output table was written to all
-Rscript check_data.R
+Rscript check_output.R
 # combine output if satisfied
 Rscript combine_output.R
 ```
