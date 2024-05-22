@@ -48,8 +48,12 @@ not.completed = which(!file.exists(filepaths.list))
 if(length(not.completed > 0)){
   message(paste0("\nThese subsets did not complete: ", 
                  paste(not.completed, collapse = " ")))
+  
+  message(paste0("\nRun this on the command line (or HPC):",
+                 '\nfor p in ', paste(not.completed, collapse = " "), 
+                 '; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done'))
 } #if
 
 if(length(not.completed) == 0){
-message("\nAll runs completed successfully.")
+message("\nAll ", length(filepaths.list), " runs completed successfully.")
 }# if
