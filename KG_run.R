@@ -373,6 +373,3 @@ output_file_path = paste0(paste0("RUNS/", arg, "/results/summary/"), output_file
 write_csv(super_table, output_file_path)
 
 message(paste0("\nOutput file written to ", output_file_path))
-
-# combine all the results from each subset into one output file
-source("combine_output.R")
