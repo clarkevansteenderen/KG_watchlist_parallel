@@ -160,7 +160,7 @@ lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
 
 The list of numbers from [1] to [48] are job numbers allocated by the HPC.
 
-### To run specific subsets of choice (e.g. 23, 32, 37, 38, and 46), you can run:        
+### To re-run specific folders/subsets of choice (e.g. 23, 32, 37, 38, and 46), you can run:        
 
 ```
 # ssh into the globus node
