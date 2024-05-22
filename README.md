@@ -35,7 +35,7 @@ Makhanda/Grahamstown
 
 ```mermaid
   graph LR;
-      A[divide_data.R] --> |subsets data| B[KG_run.R]
+      A[divide_data.R] --> |filters & subsets data| B[KG_run.R]
       A -..- |reads in| C[WATCHLIST_INPUT_FILE.txt] & D[invasive species list] & E[endemic species list] & F[GBIF accounts details]
       B --> G[check_output.R]
       B -..- |reads in| H[KG_run_setup.R]
