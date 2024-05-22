@@ -157,6 +157,10 @@ lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
 
 The list of numbers from [1] to [48] are job numbers allocated by the HPC.
 
+To run specific subsets of choice (e.g. 23, 32, 37, 38, and 46), you can run:        
+
+``` for p in 23 32 37 38 46; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done ```
+
 ## 🪲 Workflow
 
 This collection of R scripts follows the pipeline below:
