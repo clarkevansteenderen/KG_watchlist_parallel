@@ -167,18 +167,21 @@ griis.other.filtered = griis.other.filtered %>%
 ##         BASED ON THE NUMBER OF EMAIL ADDRESSES AT OUR DISPOSAL      ##
 #########################################################################
 
+gbif.info = read.csv("email_addresses.csv")
+DIVISION.VAL = length(gbif.info$email.address) * 3
+
 # Divide the griis.other dataset into subsets
 griis.rows = nrow(griis.other.filtered)
 
 # if the dataset is small -> less than 48 spp, then don't divide it up into
 # subsets at all
-if(griis.rows < 48){
-  message("There are fewer than 48 species in the list")
+if(griis.rows < DIVISION.VAL){
+  message(paste0("There are fewer than ", DIVISION.VAL, " species in the list"))
   divide.dataset.into = 1
 }# if
 
-if(griis.rows >= 48){
-divide.dataset.into = 48 # there are 16 email addresses for this, each can 
+if(griis.rows >= DIVISION.VAL){
+divide.dataset.into = DIVISION.VAL # there are 16 email addresses for this, each can 
 # run 3 simultaneous downloads -> total of 48 possible at a time
 }#else
 
@@ -294,45 +297,43 @@ if (length(koppengeiger.zones) == 1) {
 
 ##############################################################################
 
+##################################################################
+##                    SET UP EMAIL ADDRESSES                    ##
+##################################################################
+
 # each email address can be used for three simultaneous downloads,
 # so each address here can be the credentials for three separate RUN folders/jobs
-email.addresses = c("watchlist01@gmx.com", "watchlist02@gmx.com",
-                    "watchlist03@gmx.com", "watchlist04@gmx.com",
-                    "watchlist05@gmx.com", "watchlist06@proton.me",
-                    "watchlist07@proton.me", "watchlist08@proton.me",
-                    "watchlist09@proton.me", "watchlist010@proton.me",
-                    "watchlist011@proton.me", "watchlist012@proton.me",
-                    "watchlist013@proton.me", "watchlist014@proton.me",
-                    "clarke.vansteenderen@ru.ac.za", "vsteenderen@gmail.com")
+gbif.emailaddresses = gbif.info$email.address
 
-# create three reps of each so that you can use this in a loop later
-email.addresses.reps = c()
+gbif.emailaddresses.reps = c()
 
-for(q in 1:length(email.addresses)){
-  email.addresses.reps = c(email.addresses.reps, rep(email.addresses[q], 3))
+# make three copies of each email address so that each account can be used to
+# run 3 concurrent downloads. Do the same for usernames and passwords
+for(q in 1:length(gbif.emailaddresses)){
+  gbif.emailaddresses.reps = c(gbif.emailaddresses.reps, rep(gbif.emailaddresses[q], 3))
 }
 
+##################################################################
+##                    SET UP USER NAMES                         ##
+##################################################################
 
-gbif.usernames = c("watchlist01", "watchlist02", "watchlist03", "watchlist04",
-                   "watchlist05", "watchlist06", "watchlist07", "watchlist08",
-                   "watchlist09", "watchlist010", "watchlist011", "watchlist012",
-                   "watchlist013", "watchlist014",
-                   "vsteenderen", "clarke.vansteenderen")
+gbif.usernames = gbif.info$gbif.name
 
-# do the same for the usernames 
-usernames.reps = c()
+gbif.usernames.reps = c()
+
 for(q in 1:length(gbif.usernames)){
-  usernames.reps = c(usernames.reps, rep(gbif.usernames[q], 3))
+  gbif.usernames.reps = c(gbif.usernames.reps, rep(gbif.usernames[q], 3))
 }
 
-# edit the number here for Watchlist001# accordingly if you add more
-# email addresses
-gbif.passwords = c(rep("Watchlist001#",14), rep("roxie2@!",2))
+##################################################################
+##                    SET UP PASSWORDS                          ##
+##################################################################
 
-# and the same for passwords
-passwords.reps = c()
-for(q in 1:length(gbif.usernames)){
-  passwords.reps = c(passwords.reps, rep(gbif.passwords[q], 3))
+gbif.passwords = gbif.info$gbif.password
+gbif.passwords.reps = c()
+
+for(q in 1:length(gbif.passwords)){
+  gbif.passwords.reps = c(gbif.passwords.reps, rep(gbif.passwords[q], 3))
 }
 
 ##############################################################################
@@ -345,9 +346,9 @@ for(t in dirnums){
   INPUT = input.file.template
   # set the remaining columns
   INPUT$spp.file.path[1] = paste0("RUNS/RUN", t, "/watchlist_subset_", t, ".csv")
-  INPUT$gbif.username[1] = usernames.reps[t]
-  INPUT$gbif.password[1] = passwords.reps[t]
-  INPUT$gbif.email[1] = email.addresses.reps[t]
+  INPUT$gbif.username[1] = gbif.usernames.reps[t]
+  INPUT$gbif.password[1] = gbif.passwords.reps[t]
+  INPUT$gbif.email[1] = gbif.emailaddresses.reps[t]
   # remove NAs
   INPUT[is.na(INPUT)] = ""
   

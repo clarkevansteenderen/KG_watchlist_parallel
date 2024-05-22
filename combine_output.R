@@ -7,6 +7,7 @@
 # these output files from each of the 48 folders, and combines them back into
 # one. The resulting species watchlist CSV file, and log file are written to the
 # root folder as:
+
 # "watchlist_final.csv" and
 # "watchlist_logfile_final.csv"
 
@@ -37,6 +38,10 @@ subdirs = subdirs %>%
 # order them from 1 to 48, rather than 1,10,11, etc.
 subdirs = gtools::mixedsort(subdirs)
 
+# get the full file path for each output file
+filepaths.list = paste(subdirs, output.file.name, sep="/")
+logfile.list = paste(subdirs, "SKIPPED_SP_LOGFILE.txt", sep="/")
+
 # List to store dataframes
 df_list = c()
 logfile_list = c()
@@ -51,14 +56,14 @@ for (q in subdirs) {
   if (file.exists(file_path_table)) {
     # Read the Excel file and append it to the list
     df = read.csv(file_path_table)
-    df_list = dplyr::bind_rows(df_list, df)
+    df_list = rbind(df_list, df)
   }
   
   # Check if the file exists for the logs
   if (file.exists(file_path_log)) {
     # Read the text file and append it to the list
     logs = read.csv(file_path_log, header = FALSE)
-    logfile_list = dplyr::bind_rows(logfile_list, logs)
+    logfile_list = rbind(logfile_list, logs)
   }
   
 } # for

@@ -259,12 +259,12 @@ round(p/num_species_to_process*100, 2), "% complete."))
       # Code to handle the error
       message(paste0("An error occurred, likely because ", species_name, 
                    " had missing GPS data. ", e$message))
+      error.log = c(error.log, p)
       return(NULL)
     })
     
     # Check if df_results is NULL, indicating an error occurred
     if (is.null(df_results)) {
-      error.log = c(error.log, p)
       # Move on to the next iteration rather than breaking the loop
       next
     }
