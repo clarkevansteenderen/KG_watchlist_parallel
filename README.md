@@ -35,11 +35,12 @@ Makhanda/Grahamstown
 
 ```mermaid
   graph LR;
-      divide_data.R -->KG_run.R
-      KG_run.R --> check_output.R
-      KG_run.R -. reads in .->  KG_run_setup.R
-      check_output.R --> combine_output.R
-      combine_output.R --o watchlist.csv & logfile.csv
+      A[divide_data.R] --> |subsets data| B[KG_run.R]
+      A -..- |reads in| C[WATCHLIST_INPUT_FILE.txt] & D[invasive species list] & E[endemic species list] & F[GBIF accounts details]
+      B --> G[check_output.R]
+      B -..- |reads in| H[KG_run_setup.R]
+      G --> J[combine_output.R]
+      J --o K[(watchlist.csv)] & L[(logfile.csv)]
 ```
 
 An example of the console input could be:      
