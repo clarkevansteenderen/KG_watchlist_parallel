@@ -30,7 +30,8 @@ Makhanda/Grahamstown
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
 * Run ``Rscript divide_data.R`` to divide the invasive species list into 48 subsets
 * Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis
-* Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file. Any folders that did not complete will be listed, and these can be re-run (shown below)
+* Run ``check_output.R`` to see whether all the subsets completed successfully. If not, a list is returned of the folders that should be re-run
+* Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file
 
 An example of the console input could be:      
 
@@ -50,7 +51,9 @@ export LC_ALL=en_US.UTF-8
 Rscript divide_data.R
 # run the analysis, such that all 48 subsets are running in parallel
 for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
-# combine output
+# check whether all folders contain output -> i.e. an output table was written to all
+Rscript check_data.R
+# combine output if satisfied
 Rscript combine_output.R
 ```
 
@@ -173,7 +176,9 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 # run specific RUN folders
 for p in 23 32 37 38 46; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
-# combine output
+# check whether all folders contain output -> i.e. an output table was written to all
+Rscript check_data.R
+# combine output if satisfied
 Rscript combine_output.R
 ```
 
