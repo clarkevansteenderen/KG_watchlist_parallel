@@ -188,7 +188,8 @@ This collection of R scripts follows the pipeline below:
 ## Troubleshooting
 
 ⚠️ There may be times when the GBIF database is down or experiencing errors. For example, the error:    
-``Timeout was reached: [occurrence-download.gbif.org] SSL/TLS connection timeout`` might appear.    
+``Timeout was reached: [occurrence-download.gbif.org] SSL/TLS connection timeout``, or        
+``OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to api.gbif.org:443`` might appear.    
 Check the progress of the script run regularly. If an error occurred, write the latest version of the ``super_table`` object to the project directory as a CSV file, and create a new subset of your species list file from the last species that was processed. Use this as the new input, and re-run the script
 
 ⚠️ If a GBIF file is too large to read back into the R environment, an error might pop up saying something like this:    
