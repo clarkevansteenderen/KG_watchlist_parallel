@@ -30,7 +30,7 @@ Makhanda/Grahamstown
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
 * Run ``Rscript divide_data.R`` to divide the invasive species list into 48 subsets
 * Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis
-* Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file
+* Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file. Any folders that did not complete will be listed, and these can be re-run (shown below)
 
 An example of the console input could be:      
 
@@ -157,7 +157,7 @@ lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
 
 The list of numbers from [1] to [48] are job numbers allocated by the HPC.
 
-To run specific subsets of choice (e.g. 23, 32, 37, 38, and 46), you can run:        
+### To run specific subsets of choice (e.g. 23, 32, 37, 38, and 46), you can run:        
 
 ```
 # ssh into the globus node
@@ -176,6 +176,8 @@ for p in 23 32 37 38 46; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${
 # combine output
 Rscript combine_output.R
 ```
+
+💡Note that the ``divide_data.R`` script is not run again here, as it was already done the first time around.  We just need to run ``KG_run.R`` again, which will overwrite whatever is left in these target folders.
 
 ## 🪲 Workflow
 
