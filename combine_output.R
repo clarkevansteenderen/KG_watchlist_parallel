@@ -46,7 +46,10 @@ logfile.list = paste(subdirs, "SKIPPED_SP_LOGFILE.txt", sep="/")
 df_list = c()
 logfile_list = c()
 
-# Loop through each subdirectory
+##################################################################
+##                Loop through all dirs and bind dfs            ##
+##################################################################
+
 for (q in subdirs) {
   # Construct the full path to the target file
   file_path_table = file.path(q, output.file.name)
@@ -67,6 +70,25 @@ for (q in subdirs) {
   }
   
 } # for
+
+##################################################################
+##                         Find skipped species                 ##
+##################################################################
+
+original.input = read.csv("griis_data/griis_filtered_database.csv")
+
+# find which row numbers have NA
+missing.rows = which(is.na(df_list$species))
+# get the species names for these rows
+missing.species = original.input[missing.rows,]
+
+write.csv(missing.species, "MISSING_SPECIES.csv", row.names = FALSE)
+message(paste0("MISSING SPECIES FILE WRITTEN TO: ", 
+               getwd(), "/MISSING_SPECIES.csv"))
+
+##################################################################
+##                         Write output files to wd             ##
+##################################################################
 
 # write combined dataframes from all parallel runs to the proj directory
 write.csv(df_list, "WATCHLIST_OUTPUT.csv", row.names = FALSE)

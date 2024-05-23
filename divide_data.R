@@ -27,7 +27,7 @@
 # user details
 
 # If more email addresses and associated GBIF accounts are added to these 16,
-# then modify the code accordingly so that the filtered dataset is divided
+# then add them to the email_addresses.csv file so that the filtered dataset is divided
 # into more subsets (e.g. 20 email addresses means that the data can be divided
 # into subsets of 60 (20 x 3 downloads per user), rather than 48). Also add
 # to the vectors containing GBIF usernames, passwords, and email addresses
@@ -161,6 +161,10 @@ griis.other.filtered = griis.other.filtered %>%
   dplyr::filter(! accepted_name.species %in% endemics.list[[endemics.spp.name.col]])
 
 }# if
+
+# write the filtered data to file
+write.csv(griis.other.filtered, "griis_data/griis_filtered_database.csv",
+          row.names = FALSE)
 
 #########################################################################
 ##        DIVIDE SPECIES LIST INTO SUBSETS - HERE IT IS SET TO 48      ##
