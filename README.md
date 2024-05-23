@@ -93,10 +93,10 @@ Rscript combine_output.R
 
 Which should write this to the console:
 
-```MISSING SPECIES FILE WRITTEN TO: `~path/MISSING_SPECIES.csv```
-```FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv```  
-```GBIF TAXONOMIC ISSUES FILE WRITTEN TO: ~path/GBIF_TAXONOMIC_ISSUES.csv```
-```FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt```
+```MISSING SPECIES FILE WRITTEN TO: `~path/MISSING_SPECIES.csv```    
+```FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv```    
+```GBIF TAXONOMIC ISSUES FILE WRITTEN TO: ~path/GBIF_TAXONOMIC_ISSUES.csv```    
+```FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt```    
 
 ✏️ MISSING SPECIES is a list of all the species names in the input list of invasives that did not download from GBIF. This could be due to formatting issues, missing GPS data, or some other glitch in the GBIF file      
 ✏️ FINAL WATCHLIST is the most important file, listing all the species on the watchlist    
