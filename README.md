@@ -69,13 +69,30 @@ To check whether all the runs are complete:
 Rscript check_output.R
 ```
 
+Which will produce one of two messages:
+
+```ALL 48 RUNS COMPLETED SUCCESSFULLY``` 
+
+or a list of folder RUN numbers that did not complete (e.g. 1 and 3)
+
+```
+These subsets did not complete: 1 3
+Run this on the command line (or HPC):
+for p in 1 3; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
+```
+
 Combine output if everything is done:
 
 ```
 Rscript combine_output.R
 ```
 
-Which will appear as something like this:
+```
+FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv
+FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt
+```
+
+The console will appear as something like this:
 
 ```
 To run a command as administrator (user "root"), use "sudo <command>".
