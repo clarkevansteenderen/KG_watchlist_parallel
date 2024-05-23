@@ -43,25 +43,29 @@ Makhanda/Grahamstown
       J --o K[(watchlist.csv)] & L[(logfile.csv)]
 ```
 
-An example of the console input could be:      
+An example of the console input could be (with explanations below):      
 
 ```
-# ssh into the globus node
 ssh cvansteenderen@globus.chpc.ac.za 
-# password 
 Cryophytum2024@!
-# change working directory
 cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated
-# add the relevant R module
 module load chpc/BIOMODULES R/4.2.0
-# type this to do away with warnings on startup of R
 export LANG=en_US.UTF-8 
 export LC_ALL=en_US.UTF-8
-# divide the data in n subsets, and set up the analysis
 Rscript divide_data.R
-# run the analysis, such that all 48 subsets are running in parallel
 for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
 ```
+
+### Explanations for each line:
+
+ssh cvansteenderen@globus.chpc.ac.za 👉 ssh into the globus node
+Cryophytum2024@! 👉 HPC password
+cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated 👉 change working directory
+module load chpc/BIOMODULES R/4.2.0 👉 add the relevant R module
+export LANG=en_US.UTF-8 👉 type this to do away with warnings on startup of R
+export LC_ALL=en_US.UTF-8
+Rscript divide_data.R 👉 divide the data in n subsets, and set up the analysis
+for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done 👉 run the analysis, such that all 48 subsets are running in parallel
 
 To check whether all the runs are complete:
 
@@ -87,6 +91,7 @@ Combine output if everything is done:
 Rscript combine_output.R
 ```
 
+Which should write this to the console:
 
 ```FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv```    
 ```FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt```
@@ -194,33 +199,36 @@ lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
 ****ALL 48 RUNS COMPLETED SUCCESSFULLY****
 
 [cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript combine_output.R
-```
 
-The list of numbers from [1] to [48] are job numbers allocated by the HPC.
-
-### To re-run specific folders/subsets of choice (e.g. 23, 32, 37, 38, and 46), you can run:        
+FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv  
+FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt
 
 ```
-# ssh into the globus node
+
+:bulb: The list of numbers from [1] to [48] are job numbers allocated by the HPC.
+
+### To re-run specific folders/subsets of choice (e.g. 23, 32, 37, 38, and 46), you can run:    
+
+💡The **check_output.R** script will display which RUN folders have no output. These can be re-run.
+
+```
 ssh cvansteenderen@globus.chpc.ac.za 
-# password 
 Cryophytum2024@!
-# change working directory
 cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated
-# add the relevant R module
 module load chpc/BIOMODULES R/4.2.0
-# type this to do away with warnings on startup of R
 export LANG=en_US.UTF-8 
 export LC_ALL=en_US.UTF-8
-# run specific RUN folders
 for p in 23 32 37 38 46; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
-# check whether all folders contain output -> i.e. an output table was written to all
 Rscript check_output.R
-# combine output if satisfied
+```
+
+If all RUN folders now have output, combine all the results:
+
+```
 Rscript combine_output.R
 ```
 
-💡Note that the ``divide_data.R`` script is not run again here, as it was already done the first time around.  We just need to run ``KG_run.R`` again, which will overwrite whatever is left in these target folders.
+💡Note that the ``divide_data.R`` script is not run again here, as it was already done the first time around.  We just need to run ``KG_run.R`` again for the target folders.
 
 ## 🪲 Workflow
 
