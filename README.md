@@ -383,7 +383,7 @@ To create thresholded lists, one can read in the output table and subset it:
 full.table = read.csv("results/summary/supertable_full.csv")
 
 # set the threshold for the total proportion of shared KG climates
-thresh = 65
+thresh = 95
 
 # filter such that only species with 50 or more occurrence records are kept
 # save this list
@@ -403,19 +403,23 @@ full.table.thresh.subset = full.table.thresh %>%
 full.table.thresh.long = reshape2::melt(full.table.thresh.subset) 
 
 climate.bars = ggplot(data = full.table.thresh.long, 
-       aes(x = species, y = value, fill = variable)) +
-  geom_bar(stat = "identity", position = "dodge", colour = "black", alpha = 0.5) +
+                      # reorder puts them in descending order
+                      aes(x = reorder(species, -value), y = value, fill = variable)) +
+  # use dodge to not stack
+  geom_bar(stat = "identity", position = "stack", colour = "black", alpha = 0.5) +
   scale_fill_manual(values = c("black", "royalblue", "yellow", 
-                               "purple", "forestgreen")) +
-  labs(title = paste0("KG similarity over ", thresh, "%"),
+                               "purple")) +
+  labs(title = paste0("KG similarity over ", thresh, "% (n = ", num.spp.thresh, ")"),
        x = "Species",
        y = "Proportion of Records (%)",
        fill = "KG climate zone") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7)) +
   theme(axis.text.x = element_text(face = "italic")) +
-  facet_wrap(~variable)
+  coord_flip()
 
 # save plot
 ggsave(plot = climate.bars, filename = "bars.png", dpi = 450, height = 7, width = 10)
 ```
+
+<img src="bars.png" width="800">
