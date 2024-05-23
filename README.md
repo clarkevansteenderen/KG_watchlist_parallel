@@ -61,9 +61,17 @@ export LC_ALL=en_US.UTF-8
 Rscript divide_data.R
 # run the analysis, such that all 48 subsets are running in parallel
 for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
-# check whether all folders contain output -> i.e. an output table was written to all
+```
+
+To check whether all the runs are complete:
+
+```
 Rscript check_output.R
-# combine output if satisfied
+```
+
+Combine output if everything is done:
+
+```
 Rscript combine_output.R
 ```
 
@@ -165,6 +173,10 @@ lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
 [46] 31931
 [47] 31932
 [48] 31933
+[cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript check_output.R
+
+All 48 runs completed successfully.
+
 [cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript combine_output.R
 ```
 
