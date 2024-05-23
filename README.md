@@ -87,10 +87,9 @@ Combine output if everything is done:
 Rscript combine_output.R
 ```
 
-```
-FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv
-FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt
-```
+
+```FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv```
+```FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt```
 
 The console will appear as something like this:
 
