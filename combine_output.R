@@ -69,8 +69,12 @@ for (q in subdirs) {
 } # for
 
 # write combined dataframes from all parallel runs to the proj directory
-write.csv(df_list, "watchlist_final.csv", row.names = FALSE)
+write.csv(df_list, "WATCHLIST_OUTPUT.csv", row.names = FALSE)
+
+message(paste0("FINAL WATCHLIST FILE WRITTEN TO: ", getwd(), "/WATCHLIST_OUTPUT.csv"))
 
 # write combined log file
-write.table(logfile_list, "watchlist_logfile_final.txt", quote = FALSE, 
+write.table(logfile_list, "WATCHLIST_LOG_OUTPUT.txt", quote = FALSE, 
             row.names = FALSE, col.names = FALSE)
+
+message(paste0("FINAL LOG FILE WRITTEN TO: ", getwd(), "/WATCHLIST_LOG_OUTPUT.txt"))

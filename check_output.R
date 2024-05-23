@@ -55,5 +55,5 @@ if(length(not.completed > 0)){
 } #if
 
 if(length(not.completed) == 0){
-message("\nAll ", length(filepaths.list), " runs completed successfully.")
+message("\n****ALL ", length(filepaths.list), " RUNS COMPLETED SUCCESSFULLY****\n")
 }# if
