@@ -58,14 +58,14 @@ for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out"
 
 ### Explanations for each line:
 
-ssh cvansteenderen@globus.chpc.ac.za 👉 ssh into the globus node
-Cryophytum2024@! 👉 HPC password
-cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated 👉 change working directory
-module load chpc/BIOMODULES R/4.2.0 👉 add the relevant R module
-export LANG=en_US.UTF-8 👉 type this to do away with warnings on startup of R
-export LC_ALL=en_US.UTF-8
-Rscript divide_data.R 👉 divide the data in n subsets, and set up the analysis
-for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done 👉 run the analysis, such that all 48 subsets are running in parallel
+ssh cvansteenderen@globus.chpc.ac.za 👉 ssh into the globus node    
+Cryophytum2024@! 👉 HPC password    
+cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated 👉 change working directory    
+module load chpc/BIOMODULES R/4.2.0 👉 add the relevant R module    
+export LANG=en_US.UTF-8 👉 type this to do away with warnings on startup of R    
+export LC_ALL=en_US.UTF-8    
+Rscript divide_data.R 👉 divide the data in n subsets, and set up the analysis    
+for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done 👉 run the analysis, such that all 48 subsets are running in parallel    
 
 To check whether all the runs are complete:
 
