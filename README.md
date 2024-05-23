@@ -40,7 +40,7 @@ Makhanda/Grahamstown
       B --> G[check_output.R]
       B -..- |reads in| H[KG_run_setup.R]
       G --> J[combine_output.R]
-      J --o K[(watchlist.csv)] & L[(logfile.csv)]
+      J --o K[(WATCHLIST_OUTPUT.csv)] & L[(WATCHLIST_LOG_OUTPUT.csv)] & M[(GBIF_TAXONOMIC_ISSUES.csv)]
 ```
 
 An example of the console input could be (with explanations below):      
@@ -93,8 +93,15 @@ Rscript combine_output.R
 
 Which should write this to the console:
 
-```FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv```    
+```MISSING SPECIES FILE WRITTEN TO: `~path/MISSING_SPECIES.csv```
+```FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv```  
+```GBIF TAXONOMIC ISSUES FILE WRITTEN TO: ~path/GBIF_TAXONOMIC_ISSUES.csv```
 ```FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt```
+
+✏️ MISSING SPECIES is a list of all the species names in the input list of invasives that did not download from GBIF. This could be due to formatting issues, missing GPS data, or some other glitch in the GBIF file      
+✏️ FINAL WATCHLIST is the most important file, listing all the species on the watchlist    
+✏️ GBIF TAXONOMIC ISSUES lists the species that most likely had issues with taxonomic synonyms, and only downloaded some of the records available    
+✏️ FINAL LOG is a text file that is written as the analysis runs, logging problem species as it progresses. This file is not that important, as the information is also in MISSING SPECIES      
 
 The console will appear as something like this:
 
@@ -200,7 +207,9 @@ lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
 
 [cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript combine_output.R
 
-FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv  
+MISSING SPECIES FILE WRITTEN TO: ~path/MISSING_SPECIES.csv
+FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv
+GBIF TAXONOMIC ISSUES FILE WRITTEN TO: ~path/GBIF_TAXONOMIC_ISSUES.csv
 FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt
 
 ```
