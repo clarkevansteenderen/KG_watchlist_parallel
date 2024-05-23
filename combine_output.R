@@ -90,13 +90,65 @@ message(paste0("MISSING SPECIES FILE WRITTEN TO: ",
 ##                         Write output files to wd             ##
 ##################################################################
 
-# write combined dataframes from all parallel runs to the proj directory
-write.csv(df_list, "WATCHLIST_OUTPUT.csv", row.names = FALSE)
+# now that we know where the NA rows are, and have saved the missing species,
+# we can delete the NA rows from the final dataset
+df_list = na.omit(df_list)
 
+# I've noticed that the total_records_in_kg does not always equal the sum of the
+# total_records_in_ each KG zone. This seems to be due to taxonomic synonyms
+# Here, let's add a column to mark where these issues have arisen
+
+check.df = dplyr::select(df_list, species, contains("total_records_in"),
+                         -c(total_records_in_kg, species))
+
+# sum across cols
+check.df = check.df %>%
+  rowwise() %>%
+  mutate(sum = sum(c_across(everything()))) 
+
+
+df_list$sum = check.df$sum
+
+# create a new column with TRUE or FALSE if the total_records_in_kg tallies
+# with the sum across each KG zone
+df_list = df_list %>%
+  mutate(sum_equals_total_records_in_kg = sum == total_records_in_kg)
+
+df_list_out = dplyr::filter(df_list, 
+                            sum_equals_total_records_in_kg == "TRUE") %>%
+  dplyr::select(., -c(sum_equals_total_records_in_kg, sum))
+
+df_list_tax_issues = dplyr::filter(df_list, 
+                                   sum_equals_total_records_in_kg == "FALSE") %>%
+  dplyr::select(., -c(sum_equals_total_records_in_kg, sum))
+
+
+# write final combined dataframes from all parallel runs to the proj directory
+write.csv(df_list_out, "WATCHLIST_OUTPUT.csv", row.names = FALSE)
 message(paste0("FINAL WATCHLIST FILE WRITTEN TO: ", getwd(), "/WATCHLIST_OUTPUT.csv"))
+
+# write dataframes with taxonomic issues to the proj directory
+write.csv(df_list_tax_issues, "GBIF_TAXONOMIC_ISSUES.csv", row.names = FALSE)
+message(paste0("GBIF TAXONOMIC ISSUES FILE WRITTEN TO: ", 
+               getwd(), "/GBIF_TAXONOMIC_ISSUES.csv"))
 
 # write combined log file
 write.table(logfile_list, "WATCHLIST_LOG_OUTPUT.txt", quote = FALSE, 
             row.names = FALSE, col.names = FALSE)
-
 message(paste0("FINAL LOG FILE WRITTEN TO: ", getwd(), "/WATCHLIST_LOG_OUTPUT.txt"))
+
+##################################################################
+##                  Get some summary stats                      ##
+##################################################################
+
+# for df_list_out:
+
+summaries <- df_list_out %>%
+  summarise(across(c(total_n, mins, size.mb), list(
+    mean = ~mean(., na.rm = TRUE), 
+    sd = ~sd(., na.rm = TRUE), 
+    min = min, 
+    max = max, 
+    median = ~median(., na.rm = TRUE),
+    sum = sum
+  ))) 
