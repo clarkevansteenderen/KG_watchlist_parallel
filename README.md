@@ -28,7 +28,7 @@ Makhanda/Grahamstown
 * Access a node of the HPC that has access to the Internet (since GBIF downloads require an Internet connection), e.g ``ssh cvansteenderen@globus.chpc.ac.za``
 * cd (change the directory) to the relevant folder/directory on your HPC profile
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
-* Run ``Rscript divide_data.R`` to divide the invasive species list into 48 subsets
+* Run ``Rscript divide_data.R`` to divide the invasive species list into **n** subsets (depending on the number of GBIF accounts available for use; e.g. 16 email addresses x 3 simultaneous downloads allowed per user = 48). Change the 1..48 to 1..n, whatever the value of n is for the particular analysis
 * Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis
 * Run ``check_output.R`` to see whether all the subsets completed successfully. If not, a list is returned of the folders that should be re-run
 * Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file
@@ -57,7 +57,7 @@ module load chpc/BIOMODULES R/4.2.0
 # type this to do away with warnings on startup of R
 export LANG=en_US.UTF-8 
 export LC_ALL=en_US.UTF-8
-# divide the data in 48 subsets, and set up the analysis
+# divide the data in n subsets, and set up the analysis
 Rscript divide_data.R
 # run the analysis, such that all 48 subsets are running in parallel
 for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
@@ -175,7 +175,7 @@ lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
 [48] 31933
 [cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript check_output.R
 
-All 48 runs completed successfully.
+****ALL 48 RUNS COMPLETED SUCCESSFULLY****
 
 [cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript combine_output.R
 ```
