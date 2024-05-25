@@ -138,7 +138,7 @@ If all RUN folders now have output, combine all the results:
 Rscript combine_output.R
 ```
 
-💡Note that the ``get_synonyms.R`` script is not run again here, as it was already done the first time around.  We just need to run ``KG_run.R`` again for the target folders.
+💡Note that the ``get_synonyms.R`` and ``divide_data.R`` scripts are not run again here, as they were already run the first time around.  We just need to run ``KG_run.R`` again for the target folders.
 
 ## 🪲 Workflow
 
