@@ -65,8 +65,8 @@ for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out"
 ``module load chpc/BIOMODULES R/4.2.0`` 👉 *add the relevant R module*    
 ``export LANG=en_US.UTF-8`` 👉 *type this to do away with warnings on startup of R*    
 ``export LC_ALL=en_US.UTF-8 ``      
-``nohup Rscript get_synonyms.R &> get_synonyms.out &`` 👉 *get all species synonyms to create a larger input dataset, divide the data in n subsets, and set up the analysis*    
-``for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` 👉 *run the analysis, such that all 51 subsets are running in parallel*    
+``nohup Rscript get_synonyms.R &> get_synonyms.out &`` 👉 *get all species synonyms to create a larger input dataset, divide the data in n subsets, and set up the analysis. A log file called **get_synonyms.out** will be written to track progress*    
+``for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` 👉 *run the analysis, such that all 51 subsets are running in parallel. A log file will be written to each RUN(n) folder, called **RUN(n).out***    
 
 To check whether all the runs are complete, run:
 
