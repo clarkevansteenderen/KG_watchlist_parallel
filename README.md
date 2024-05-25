@@ -28,19 +28,20 @@ Makhanda/Grahamstown
 * Access a node of the HPC that has access to the Internet (since GBIF downloads require an Internet connection), e.g ``ssh cvansteenderen@globus.chpc.ac.za``
 * cd (change the directory) to the relevant folder/directory on your HPC profile
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
-* Run ``Rscript divide_data.R`` to divide the invasive species list into **n** subsets (depending on the number of GBIF accounts available for use; e.g. 16 email addresses x 3 simultaneous downloads allowed per user = 48). Change the 1..48 to 1..n, whatever the value of n is for the particular analysis
-* Run ``for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis
-* Run ``check_output.R`` to see whether all the subsets completed successfully. If not, a list is returned of the folders that should be re-run
+* Run ``nohup Rscript get_synonyms.R &> get_synonyms.out &`` to search for all the available synonyms for each species, and divide the invasive species list into **n** subsets (depending on the number of GBIF accounts available for use; e.g. 16 email addresses x 3 simultaneous downloads allowed per user = 48). Change the 1..48 to 1..n, whatever the value of n is for the particular analysis
+* Run ``for p in {1..n}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis
+* Run ``Rscript check_output.R`` to see whether all the subsets completed successfully. If not, a list is returned of the folders that should be re-run
 * Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file
 
 ```mermaid
   graph LR;
-      A[divide_data.R] --> |filters & subsets data| B[KG_run.R]
-      A -..- |reads in| C>WATCHLIST_INPUT_FILE.txt] & D>invasive species list] & E>endemic species list] & F>GBIF accounts details]
-      B --> G[check_output.R]
-      B -..- |reads in| H[KG_run_setup.R]
-      G --> J[combine_output.R]
-      J --o K[(WATCHLIST_OUTPUT.csv)] & L[(WATCHLIST_LOG_OUTPUT.csv)] & M[(GBIF_TAXONOMIC_ISSUES.csv)]
+      A[get_synonyms.R] --> |CALLS| B[divide_data.R]
+      A -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt] & D>invasive species list] & E>endemic species list] 
+      B -..- |READS IN| F>GBIF accounts details]
+      B --> G[KG_run.R]
+      G --> |CALLS| H[KG_run_setup.R]
+      G --> I[check_output.R] & J[combine_output.R]
+      J--o K[(WATCHLIST_OUTPUT.csv)] & L[(WATCHLIST_LOG_OUTPUT.csv)] & M[(GBIF_TAXONOMIC_ISSUES.csv)]
 ```
 
 An example of the console input could be (with explanations below):      
@@ -53,7 +54,7 @@ module load chpc/BIOMODULES R/4.2.0
 export LANG=en_US.UTF-8 
 export LC_ALL=en_US.UTF-8
 nohup Rscript get_synonyms.R &> get_synonyms.out &
-for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
+for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
 ```
 
 ### Explanations for each line:
@@ -64,10 +65,10 @@ cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated 👉 *change wo
 module load chpc/BIOMODULES R/4.2.0 👉 *add the relevant R module*    
 export LANG=en_US.UTF-8 👉 *type this to do away with warnings on startup of R*    
 export LC_ALL=en_US.UTF-8    
-Rscript divide_data.R 👉 *divide the data in n subsets, and set up the analysis*    
-for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done 👉 *run the analysis, such that all 48 subsets are running in parallel*    
+nohup Rscript get_synonyms.R &> get_synonyms.out & 👉 *get all species synonyms to create a larger input dataset, divide the data in n subsets, and set up the analysis*    
+for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done 👉 *run the analysis, such that all 51 subsets are running in parallel*    
 
-To check whether all the runs are complete:
+To check whether all the runs are complete, run:
 
 ```
 Rscript check_output.R
@@ -75,7 +76,7 @@ Rscript check_output.R
 
 Which will produce one of two messages:
 
-```ALL 48 RUNS COMPLETED SUCCESSFULLY``` 
+```ALL n RUNS COMPLETED SUCCESSFULLY``` 
 
 or a list of folder RUN numbers that did not complete (e.g. 1 and 3)
 
@@ -101,120 +102,7 @@ Which should write this to the console:
 ✏️ MISSING SPECIES is a list of all the species names in the input list of invasives that did not download from GBIF. This could be due to formatting issues, missing GPS data, or some other glitch in the GBIF file      
 ✏️ FINAL WATCHLIST is the most important file, listing all the species on the watchlist    
 ✏️ GBIF TAXONOMIC ISSUES lists the species that most likely had issues with taxonomic synonyms, and only downloaded some of the records available    
-✏️ FINAL LOG is a text file that is written as the analysis runs, logging problem species as it progresses. This file is not that important, as the information is also in MISSING SPECIES      
-
-The console will appear as something like this:
-
-```
-To run a command as administrator (user "root"), use "sudo <command>".
-See "man sudo_root" for details.
-
-clarke@DESKTOP-QOA94I2:~$ ssh cvansteenderen@globus.chpc.ac.za
-cvansteenderen@globus.chpc.ac.za's password:
-Last login: Tue May 21 18:06:54 2024 from 8ta-246-129-164.telkomadsl.co.za
-[cvansteenderen@globus ~]$ cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated
-[cvansteenderen@globus kg_watchlist_MULTI_automated]$ module load chpc/BIOMODULES R/4.2.0
-[cvansteenderen@globus kg_watchlist_MULTI_automated]$ export LANG=en_US.UTF-8
-[cvansteenderen@globus kg_watchlist_MULTI_automated]$ export LC_ALL=en_US.UTF-8
-[cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript divide_data.R
-── Attaching packages ─────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.2 ──
-✔ ggplot2 3.5.0     ✔ purrr   1.0.2
-✔ tibble  3.2.1     ✔ dplyr   1.1.4
-✔ tidyr   1.3.1     ✔ stringr 1.5.1
-✔ readr   2.1.5     ✔ forcats 0.5.2
-── Conflicts ────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-
-Attaching package: ‘magrittr’
-
-The following object is masked from ‘package:purrr’:
-
-    set_names
-
-The following object is masked from ‘package:tidyr’:
-
-    extract
-
-Rows: 107045 Columns: 16
-── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────
-Delimiter: ","
-chr (15): scientific_name, scientific_name_type, kingdom, establishment_mean...
-lgl  (1): accepted_name
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 695 Columns: 20
-── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────
-Delimiter: "\t"
-chr (15): id, taxonID, scientificName, kingdom, phylum, class, order, family...
-lgl  (5): acceptedNameUsageID, namePublishedIn, namePublishedInYear, vernacu...
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[cvansteenderen@globus kg_watchlist_MULTI_automated]$ for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
-[1] 31878
-[2] 31879
-[3] 31880
-[4] 31881
-[5] 31882
-[6] 31883
-[7] 31886
-[8] 31888
-[9] 31889
-[10] 31890
-[11] 31892
-[12] 31893
-[13] 31895
-[14] 31896
-[15] 31897
-[16] 31899
-[17] 31900
-[18] 31901
-[19] 31902
-[20] 31903
-[21] 31904
-[22] 31905
-[23] 31906
-[24] 31907
-[25] 31908
-[26] 31909
-[27] 31910
-[28] 31911
-[29] 31913
-[30] 31914
-[31] 31915
-[32] 31916
-[33] 31917
-[34] 31918
-[35] 31920
-[36] 31921
-[37] 31922
-[38] 31923
-[39] 31924
-[40] 31925
-[41] 31926
-[42] 31927
-[43] 31928
-[44] 31929
-[45] 31930
-[46] 31931
-[47] 31932
-[48] 31933
-[cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript check_output.R
-
-****ALL 48 RUNS COMPLETED SUCCESSFULLY****
-
-[cvansteenderen@globus kg_watchlist_MULTI_automated]$ Rscript combine_output.R
-
-MISSING SPECIES FILE WRITTEN TO: ~path/MISSING_SPECIES.csv
-FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv
-GBIF TAXONOMIC ISSUES FILE WRITTEN TO: ~path/GBIF_TAXONOMIC_ISSUES.csv
-FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt
-
-```
-
-:bulb: The list of numbers from [1] to [48] are job numbers allocated by the HPC.
+✏️ FINAL LOG is a text file that is written as the analysis runs, logging problem species as it progresses    
 
 ### To re-run specific folders/subsets of choice (e.g. 23, 32, 37, 38, and 46), you can run:    
 
@@ -237,7 +125,7 @@ If all RUN folders now have output, combine all the results:
 Rscript combine_output.R
 ```
 
-💡Note that the ``divide_data.R`` script is not run again here, as it was already done the first time around.  We just need to run ``KG_run.R`` again for the target folders.
+💡Note that the ``get_synonyms.R`` script is not run again here, as it was already done the first time around.  We just need to run ``KG_run.R`` again for the target folders.
 
 ## 🪲 Workflow
 
@@ -260,12 +148,13 @@ This collection of R scripts follows the pipeline below:
 
 ## 👓 Code layout
 
-* The ``KG_run.R`` and ``divide_data.R`` files are the main scripts that are run from the console. 
-* ``divide_data.R`` reads in the ``WATCHLIST_INPUT_FILE.txt`` file and sets all the required user parameters, divides the invasive species list into 48 subsets, and allocates each data subset to a different RUN folder. Each RUN folder also gets its own ``INPUT.csv`` folder, specifying the path to the data subset, GBIF credentials to enable downloading, and other parameters specified in the ``WATCHLIST_INPUT_FILE.txt`` as edited by the user.
+* The ``KG_run.R`` is where the analysis is set in motion
+* The ``get_synonyms.R`` script reads in the ``WATCHLIST_INPUT_FILE.txt`` file, sets all the required user parameters, filters the data accordingly, and finds all the synonyms on GBIF for each target species. This then creates a much larger input dataset.
+* ``get_synonyms.R`` calls the ``divide_data.R`` script, which divides the invasive species list into n subsets, and allocates each data subset to a different RUN folder. Each RUN folder also gets its own ``INPUT.csv`` folder, specifying the path to the data subset, GBIF credentials to enable downloading, and other parameters specified in the ``WATCHLIST_INPUT_FILE.txt`` as edited by the user.
 * ``KG_run_setup.R`` is called by ``KG_run.R``, and loads up the necessary libraries, reads in the input parameter file (``INPUT.csv``), creates output folders, and sets up the dataframes required for the analysis
-* ``combine_output.R`` is also called by ``KG_run.R``, and combines the output from all 48 parallel runs back into one CSV file, and combines all the log files into one
+* ``combine_output.R`` combines the output from all n parallel runs back into one CSV file, and combines all the log files into one
 
-💡The only file that the user needs to change is ``WATCHLIST_INPUT_FILE.txt``. If specific changes need to be made to the filtering of the invasive species list before it is divided into 48 subsets (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``divide_data.R`` file.
+💡The only file that the user needs to change is ``WATCHLIST_INPUT_FILE.txt``. If specific changes need to be made to the filtering of the invasive species list before it is divided into n subsets (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
 
 ## Troubleshooting
 
