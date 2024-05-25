@@ -43,6 +43,8 @@ colnames(input.params) = c("parameter", "choice")
 rownames(input.params) = input.params$parameter
 input.params = dplyr::select(input.params, !parameter)
 
+#################################################################
+
 # extract the relevant information
 griis.full = readr::read_delim(filter(input.params,
                                       row.names(input.params) %in% 
@@ -72,35 +74,12 @@ target.kingdom = filter(input.params,
                           c("KINGDOM"))$choice
 
 ####################################################################
-##  GENERATE CUSTOMISED FILES WITH INPUT PARAMETERS FOR EACH RUN  ##
+##  # extract more info from the user's input file  ##
 ####################################################################
-
-# extract more info from the user's input file
-
-iso.country.code = filter(input.params,
-                          row.names(input.params) %in% 
-                            c("ISO COUNTRY CODE"))$choice
 
 spp.name.column = filter(input.params,
                          row.names(input.params) %in% 
                            c("SPECIES NAME COLUMN"))$choice
-
-koppengeiger.zones = filter(input.params,
-                            row.names(input.params) %in% 
-                              c("KOPPEN-GEIGER ZONES"))$choice 
-koppengeiger.zones = as.numeric(unlist(strsplit(koppengeiger.zones, ",\\s*")))
-
-output.file.name = filter(input.params,
-                          row.names(input.params) %in% 
-                            c("OUTPUT FILE NAME"))$choice
-
-keep.downloads = filter(input.params,
-                        row.names(input.params) %in% 
-                          c("KEEP DOWNLOADS"))$choice
-
-num.spp = filter(input.params,
-                 row.names(input.params) %in% 
-                   c("NUMBER OF SPECIES TO PROCESS"))$choice
 
 #################################################################
 ##                  GENERATE SPECIES LIST                  ##
@@ -162,23 +141,29 @@ SPECNAMES = griis.other.filtered %>%
   as.data.frame()
 
 # small subset to test
-#SPECNAMES = dplyr::slice(SPECNAMES, c(1:5))
+SPECNAMES = dplyr::slice(SPECNAMES, c(1:5))
 
 for(t in 1:nrow(SPECNAMES)){
   
+  synonyms.df = c()
+  
   tryCatch({
-    synonyms.df = rgbif::name_backbone_checklist(SPECNAMES[t,], verbose=T) %>%
-      dplyr::select(usageKey, scientificName, status, matchType,
-                    canonicalName, rank, species, speciesKey) %>%
-      dplyr::filter(rank == "SPECIES", matchType %in% c("EXACT", "FUZZY"))
     
     message(paste0("Getting synonyms for ", SPECNAMES[t,], ": ", t, " of ", 
                    nrow(SPECNAMES)))
+    
+    synonyms.df = rgbif::name_backbone_checklist(SPECNAMES[t,], verbose=T) %>%
+      dplyr::select(usageKey, scientificName, status, matchType,
+                    canonicalName, rank, species, speciesKey) %>%
+      dplyr::filter(rank == "SPECIES", matchType %in% c("EXACT", "FUZZY")) %>%
+      # remove all duplicate speciesKey rows
+      dplyr::distinct(speciesKey, .keep_all = TRUE)
   }, 
   error = function(e) {
     message(paste0("\nAn error occurred while fetching GBIF information for ", 
                    SPECNAMES[t,], ": ", 
         conditionMessage(e), " ...moving on\n"))
+    
     return(NULL)  # Return NULL if usageKey is not found
   })
   
@@ -204,7 +189,7 @@ for(t in 1:nrow(SPECNAMES)){
 }#for
 
 message(paste0("\nYour species list changed from ", nrow(SPECNAMES), " to ",
-               nrow(SYNONYM.LIST), " in size \n"))
+               nrow(SYNONYM.LIST), " entries \n"))
 
 # SYNONYM.LIST is now the input list to use for the rest of the analysis
 # we can use the speciesKeys straight up now
@@ -213,8 +198,8 @@ write.csv(SYNONYM.LIST, "FILTERED_SYNONYMS_INC_INPUT_DATA.csv", row.names = FALS
 
 # if the log file is not empty, write to PC
 if(!is.null(LOGFILE.LIST)){
-write.csv(as.data.frame(LOGFILE.LIST), "LOGFILE.csv", row.names = FALSE)
+write.csv(as.data.frame(LOGFILE.LIST), "NO_GBIF_RECS.csv", row.names = FALSE)
 }#if
 
-message(paste0('Now running the "divide_data.R" script'))
-source("divide_data.R")
+message(paste0("These species did not have GBIF records: ",
+               paste(LOGFILE.LIST, collapse = ", ") ))

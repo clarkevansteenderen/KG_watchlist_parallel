@@ -24,6 +24,51 @@
 # into subsets of 60 (20 x 3 downloads per user), rather than 51). Also add
 # to the vectors containing GBIF usernames, passwords, and email addresses
 
+#################################################################
+##                            SETUP                            ##
+#################################################################
+
+library(tidyverse)
+library(tidyr)
+library(readr)
+library(magrittr)
+library(dplyr)
+
+#################################################################
+##                    READ IN FILES                            ##
+#################################################################
+
+# read in the input file with user-changed parameters
+input.params = read.delim("WATCHLIST_INPUT_FILE.txt", header = FALSE)
+colnames(input.params) = c("parameter", "choice")
+rownames(input.params) = input.params$parameter
+input.params = dplyr::select(input.params, !parameter)
+
+####################################################################
+##    extract  info from the user's input file                    ##
+####################################################################
+
+iso.country.code = filter(input.params,
+                          row.names(input.params) %in% 
+                            c("ISO COUNTRY CODE"))$choice
+
+koppengeiger.zones = filter(input.params,
+                            row.names(input.params) %in% 
+                              c("KOPPEN-GEIGER ZONES"))$choice 
+koppengeiger.zones = as.numeric(unlist(strsplit(koppengeiger.zones, ",\\s*")))
+
+output.file.name = filter(input.params,
+                          row.names(input.params) %in% 
+                            c("OUTPUT FILE NAME"))$choice
+
+keep.downloads = filter(input.params,
+                        row.names(input.params) %in% 
+                          c("KEEP DOWNLOADS"))$choice
+
+num.spp = filter(input.params,
+                 row.names(input.params) %in% 
+                   c("NUMBER OF SPECIES TO PROCESS"))$choice
+
 #########################################################################
 ##        DIVIDE SPECIES LIST INTO n SUBSETS -                         ##
 ##         BASED ON THE NUMBER OF EMAIL ADDRESSES AT OUR DISPOSAL      ##
@@ -35,6 +80,7 @@ DIVISION.VAL = length(gbif.info$email.address) * 3
 message(paste0("Read in ", nrow(gbif.info), " email addresses"))
 
 # Divide the input data into subsets
+SYNONYM.LIST = read.csv("FILTERED_SYNONYMS_INC_INPUT_DATA.csv")
 synonym.rows = nrow(SYNONYM.LIST)
 
 message(paste0("Dividing data (n = ", synonym.rows, ") into ", DIVISION.VAL, " subsets"))
@@ -63,6 +109,10 @@ sizes = rep(base_size, divide.dataset.into)
 if(remainder > 0){
   sizes[divide.dataset.into] = sizes[divide.dataset.into] + remainder
 }
+
+message(paste0("The data have been divided into ", DIVISION.VAL-1, 
+               " subsets of ", sizes[1], " species, and 1 subset of ", 
+               sizes[length(sizes)], " species"))
 
 # create indices for each subset of the data
 indices = list()
