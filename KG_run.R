@@ -50,7 +50,8 @@ start_time <- Sys.time()
 #########################################################################
     
 # Get species name
-species_name <- species_names[p]
+species_name = species_names[p]
+KEY = species_keys[p]
     
 # print this progress message on the first and second iteration (Exclude time info, 
 # as it's too early to estimate times)
@@ -60,41 +61,13 @@ species_name, ": ", p, " of ",
 num_species_to_process, " -> ", 
 round(p/num_species_to_process*100, 2), "% complete."))
     
-    gbif_taxon_keys <- tryCatch({
-      
-      rgbif::name_backbone_checklist(species_name) %>% 
-        dplyr::filter(!matchType == "NONE") %>%
-        dplyr::pull(usageKey)
-    }, 
-    error = function(e) {
-      cat("Error occurred while fetching usageKey for", species_name, ":", 
-          conditionMessage(e), "\n")
-      return(NULL)  # Return NULL if usageKey is not found
-    })
-    
-    # Check if usageKey is NULL, indicating an error occurred
-    if (is.null(gbif_taxon_keys)) {
-      error.log = c(error.log, p)
-      # Move on to the next iteration rather than breaking the loop
-      next
-    }
-    
-    num.recs.available = rgbif::occ_count(scientificName = species_name)
-    message(paste0("There are ", num.recs.available, " records on GBIF for ",
-                   species_name, ". Usage key: ", gbif_taxon_keys))
+    message(paste0("There are ", watchlist_file$num.recs[p], " records on GBIF for ",
+                   species_name, ". Key: ", KEY))
     
     message(paste0("Download started at ", Sys.time()))
     
-    # Check if the number of records is zero
-    if (num.recs.available == 0) {
-      error.log = c(error.log, p)
-      message("Skipping due to zero records on GBIF")
-      # Move on to the next iteration rather than breaking the loop
-      next
-    }
-    
     # Download records for the taxon key
-    gbif_download <- download_records(gbif_taxon_keys)
+    gbif_download <- download_records(KEY)
     
     rgbif::occ_download_wait(gbif_download) 
     
@@ -112,8 +85,7 @@ round(p/num_species_to_process*100, 2), "% complete."))
     ############################################################################
     
     tryCatch({
-      # limit the rows read in to 500,000
-      import_back_file <- rgbif::occ_download_import(result, nrows = 500000)
+      import_back_file <- rgbif::occ_download_import(result)
     }, error = function(e) {
       # Code to handle the error
       print(paste("An error occurred in reading in the gbif folder:", e$message))

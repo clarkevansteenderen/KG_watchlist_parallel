@@ -35,7 +35,7 @@ subdirs = list.dirs(main_dir, recursive = TRUE, full.names = TRUE)[-1]
 # keep just the dirs that contain "results/summary" in the path
 subdirs = subdirs %>%
   grep("results/summary", ., value = TRUE) 
-# order them from 1 to 48, rather than 1,10,11, etc.
+# order them from 1 to n, rather than 1,10,11, etc.
 subdirs = gtools::mixedsort(subdirs)
 
 # get the full file path for each output file
@@ -49,13 +49,13 @@ logfile_list = c()
 ##################################################################
 ##                Loop through all dirs and bind dfs            ##
 ##################################################################
-
+ind = 1
 for (q in subdirs) {
   # Construct the full path to the target file
   file_path_table = file.path(q, output.file.name)
-  file_path_log = file.path(q, "SKIPPED_SP_LOGFILE.txt")
+  file_path_log = file.path(sub("/results/.*", "", q), paste0("RUN", ind, ".out"))
   
-  # Check if the file exists for the output table
+  #Check if the file exists for the output table
   if (file.exists(file_path_table)) {
     # Read the Excel file and append it to the list
     df = read.csv(file_path_table)
@@ -65,9 +65,11 @@ for (q in subdirs) {
   # Check if the file exists for the logs
   if (file.exists(file_path_log)) {
     # Read the text file and append it to the list
-    logs = read.csv(file_path_log, header = FALSE)
-    logfile_list = rbind(logfile_list, logs)
+    logs = readLines(file_path_log)
+    logfile_list = c(logfile_list, logs)
   }
+  
+  ind = ind +1
   
 } # for
 
@@ -80,7 +82,8 @@ original.input = read.csv("griis_data/griis_filtered_database.csv")
 # find which row numbers have NA
 missing.rows = which(is.na(df_list$species))
 # get the species names for these rows
-missing.species = original.input[missing.rows,]
+missing.species = original.input[missing.rows,] %>%
+  dplyr::arrange(., accepted_name.species)
 
 write.csv(missing.species, "MISSING_SPECIES.csv", row.names = FALSE)
 message(paste0("MISSING SPECIES FILE WRITTEN TO: ", 
@@ -116,26 +119,39 @@ df_list = df_list %>%
 
 df_list_out = dplyr::filter(df_list, 
                             sum_equals_total_records_in_kg == "TRUE") %>%
-  dplyr::select(., -c(sum_equals_total_records_in_kg, sum))
+  dplyr::select(., -c(sum_equals_total_records_in_kg, sum)) %>%
+  dplyr::arrange(., species) # order alphabetically -> this will help spot 
+# duplicates
 
 df_list_tax_issues = dplyr::filter(df_list, 
                                    sum_equals_total_records_in_kg == "FALSE") %>%
-  dplyr::select(., -c(sum_equals_total_records_in_kg, sum))
+  dplyr::select(., -c(sum_equals_total_records_in_kg, sum)) %>%
+  dplyr::arrange(., species)
 
+# this fetches the species with issues from the original file as well, so that
+# we can also see the other original column info for these spp
+false.rows = which(df_list$sum_equals_total_records_in_kg == "FALSE")
+
+df_list_tax_issues_b = original.input[false.rows,] %>%
+  dplyr::arrange(., accepted_name.species)
 
 # write final combined dataframes from all parallel runs to the proj directory
 write.csv(df_list_out, "WATCHLIST_OUTPUT.csv", row.names = FALSE)
 message(paste0("FINAL WATCHLIST FILE WRITTEN TO: ", getwd(), "/WATCHLIST_OUTPUT.csv"))
 
 # write dataframes with taxonomic issues to the proj directory
-write.csv(df_list_tax_issues, "GBIF_TAXONOMIC_ISSUES.csv", row.names = FALSE)
-message(paste0("GBIF TAXONOMIC ISSUES FILE WRITTEN TO: ", 
-               getwd(), "/GBIF_TAXONOMIC_ISSUES.csv"))
+write.csv(df_list_tax_issues, "GBIF_TAXONOMIC_ISSUES_A.csv", row.names = FALSE)
+message(paste0("GBIF TAXONOMIC ISSUES FILE A WRITTEN TO: ", 
+               getwd(), "/GBIF_TAXONOMIC_ISSUES_A.csv"))
+
+write.csv(df_list_tax_issues_b, "GBIF_TAXONOMIC_ISSUES_B.csv", row.names = FALSE)
+message(paste0("GBIF TAXONOMIC ISSUES FILE B WRITTEN TO: ", 
+               getwd(), "/GBIF_TAXONOMIC_ISSUES_B.csv"))
 
 # write combined log file
-write.table(logfile_list, "WATCHLIST_LOG_OUTPUT.txt", quote = FALSE, 
-            row.names = FALSE, col.names = FALSE)
-message(paste0("FINAL LOG FILE WRITTEN TO: ", getwd(), "/WATCHLIST_LOG_OUTPUT.txt"))
+writeLines(logfile_list, "WATCHLIST_LOG_OUTPUT.txt")
+message(paste0("FINAL LOG FILE WRITTEN TO: ", getwd(), 
+               "/WATCHLIST_LOG_OUTPUT.txt"))
 
 ##################################################################
 ##                  Get some summary stats                      ##

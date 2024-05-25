@@ -109,7 +109,11 @@ if(!is.numeric(num_species_to_process)){
 
 species_names = watchlist_file %>% 
   dplyr::slice(1:num_species_to_process) %>% 
-  dplyr::pull(user.input$spp.name.column[1]) 
+  dplyr::pull(species[1]) 
+
+species_keys = watchlist_file %>% 
+  dplyr::slice(1:num_species_to_process) %>% 
+  dplyr::pull(speciesKey[1]) 
 
 #########################################################################
 # create output table
@@ -160,9 +164,10 @@ colnames(super_table) = colnames_supertable
 # Function to download records for a single taxon key
 #########################################################################
 
-download_records = function(taxon_key) {
+download_records = function(K) {
   rgbif::occ_download(
-    rgbif::pred_in("taxonKey", taxon_key),
+    # could also be taxonKey?
+    rgbif::pred_in("speciesKey", K),
     format = "SIMPLE_CSV",
     user = user.input$gbif.username[1],
     pwd = user.input$gbif.password[1],

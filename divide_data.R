@@ -2,195 +2,58 @@
 ##                         CODE RUNDOWN                         ##
 ##################################################################
 
-# This script reads in the WATCHLIST_INPUT_FILE.txt file in the project directory,
-# and extracts the user's input parameters. This includes the file paths to
-# the global list of invasive species from GRIIS, and an optional list of
-# endemic species for the target country. Then:
-
-# (1) The full list of invasive species is filtered such that species are
-# removed that are already present in the target country, and that are natives
-
-# (2) The filtered list is divided into 48 subsets (since there are 16 email
+# (1) The new input data is divided into n subsets (since there are n email
 # addresses available, and each can download a maximum of three records at the
-# same time from GBIF: 16 * 3 = 48)
+# same time from GBIF: n * 3 = 3n)
 
-# (3) A folder called RUNS is created, into which 48 empty folders are written
-# and named RUN1 up to RUN48 (i.e. RUNS/RUN1, RUNS/RUN2, etc.)
-# Each of the 48 [species list] subsets is then written into each corresponding
+# (2) A folder called RUNS is created, into which n empty folders are written
+# and named RUN1 up to RUN48(n) (i.e. RUNS/RUN1, RUNS/RUN2, etc.)
+# Each of the n species subsets is then written into each corresponding
 # RUN(n) folder. I.e. RUNS/RUN1/watchlist_subset_1.csv, 
 # RUNS/RUN2/watchlist_subset_2.csv, and so on.
 
-# (4) Each RUNS/RUN(n) folder then also needs an INPUT.csv file, which contains 
+# (3) Each RUNS/RUN(n) folder then also needs an INPUT.csv file, which contains 
 # input parameters that have been taken from the WATCHLIST_INPUT_FILE.txt file,
 # and GBIF account information (username, email address, and password).
 # This is done so that every three consecutive data subsets get the same GBIF 
 # user details
 
-# If more email addresses and associated GBIF accounts are added to these 16,
+# If more email addresses and associated GBIF accounts are added to these n,
 # then add them to the email_addresses.csv file so that the filtered dataset is divided
 # into more subsets (e.g. 20 email addresses means that the data can be divided
-# into subsets of 60 (20 x 3 downloads per user), rather than 48). Also add
+# into subsets of 60 (20 x 3 downloads per user), rather than 51). Also add
 # to the vectors containing GBIF usernames, passwords, and email addresses
 
-#################################################################
-##                            SETUP                            ##
-#################################################################
-
-library(tidyverse)
-library(tidyr)
-library(readr)
-library(magrittr)
-library(dplyr)
-
-# change the divide.dataset.into value from 48 if you add more email addresses
-# also then edit the usernames and email addresses
-
-#################################################################
-##                  GENERATE THE SPECIES LIST                  ##
-#################################################################
-
-# read in the input file with user-changed parameters
-input.params = read.delim("WATCHLIST_INPUT_FILE.txt", header = FALSE)
-colnames(input.params) = c("parameter", "choice")
-rownames(input.params) = input.params$parameter
-input.params = dplyr::select(input.params, !parameter)
-
-# extract the relevant information
-griis.full = readr::read_delim(filter(input.params,
-                                      row.names(input.params) %in% 
-                                      c("SPECIES LIST PATH"))$choice)
-
-endemics.list.path = dplyr::filter(input.params,
-                                         row.names(input.params) %in% 
-                                           c("ENDEMICS LIST PATH"))$choice
-
-# if a path is provided, read in the endemics file
-if(endemics.list.path != ""){
-  # change read_delim depending on the format of the file (e.g. CSV)
-endemics.list = readr::read_delim(endemics.list.path)
-
-endemics.spp.name.col = filter(input.params,
-                               row.names(input.params) %in% 
-                                 c("ENDEMICS NAME COLUMN"))$choice 
-}#if
-
-target.country = filter(input.params,
-                        row.names(input.params) %in% 
-                        c("TARGET COUNTRY"))$choice
-
-# this might need to be ignored, depending on the desired outcome
-target.kingdom = filter(input.params,
-                        row.names(input.params) %in% 
-                        c("KINGDOM"))$choice
-
-####################################################################
-##  GENERATE CUSTOMISED FILES WITH INPUT PARAMETERS FOR EACH RUN  ##
-####################################################################
-
-# extract more info from the user's input file
-
-iso.country.code = filter(input.params,
-                          row.names(input.params) %in% 
-                          c("ISO COUNTRY CODE"))$choice
-
-spp.name.column = filter(input.params,
-                         row.names(input.params) %in% 
-                          c("SPECIES NAME COLUMN"))$choice
-
-koppengeiger.zones = filter(input.params,
-                            row.names(input.params) %in% 
-                            c("KOPPEN-GEIGER ZONES"))$choice 
-koppengeiger.zones = as.numeric(unlist(strsplit(koppengeiger.zones, ",\\s*")))
-
-output.file.name = filter(input.params,
-                          row.names(input.params) %in% 
-                          c("OUTPUT FILE NAME"))$choice
-
-keep.downloads = filter(input.params,
-                        row.names(input.params) %in% 
-                        c("KEEP DOWNLOADS"))$choice
-
-num.spp = filter(input.params,
-                 row.names(input.params) %in% 
-                  c("NUMBER OF SPECIES TO PROCESS"))$choice
-
-#################################################################
-##                  GENERATE SPECIES LIST                  ##
-#################################################################
-
-# Extract all the Mauritius records for Plantae that are invasive
-griis.target = dplyr::filter(griis.full, 
-                             checklist.name == target.country,
-                             accepted_name.kingdom == target.kingdom,
-                             #is_invasive == "invasive"
-) %>%
-  dplyr::distinct(., accepted_name.species, .keep_all = TRUE) %>%
-  dplyr::arrange(., accepted_name.species) # order alphabetically
-
-# Extract everything other than Mauritius records for Plantae that are invasive
-griis.other = dplyr::filter(griis.full, 
-                            checklist.name != target.country,
-                            accepted_name.kingdom == target.kingdom,
-                            is_invasive == "invasive") %>%
-  dplyr::distinct(. , accepted_name.species, .keep_all = TRUE) %>%
-  dplyr::arrange(., accepted_name.species) # order alphabetically
-
-# remove any species in the Mauritius list (griis.target) 
-# FROM the "griis.other" list
-griis.other.filtered = griis.other %>%
-  dplyr::filter(! accepted_name.species %in% griis.target$accepted_name.species)
-
-# Only bother with this if there is a list of endemics available
-# read in a list of native flowering plants in Mauritius, 
-# and remove those records from the "griis.other.filtered" list
-
-# if a path was provided for endemics, then remove those from the list of 
-# invasive species not yet in MAU
-if(endemics.list.path != ""){
-
-# remove duplicates from the endemics list
-endemics.list = endemics.list %>%
-  dplyr::distinct(. , endemics.list[[endemics.spp.name.col]], .keep_all = TRUE)
-
-# store the native species that were in the griis list (and now removed)
-endemics_in_griis_list = griis.other.filtered %>%
-  dplyr::filter(accepted_name.species %in% endemics.list[[endemics.spp.name.col]])
-
-# remove species in the endemics list FROM the "griis.other.filtered" list
-griis.other.filtered = griis.other.filtered %>%
-  dplyr::filter(! accepted_name.species %in% endemics.list[[endemics.spp.name.col]])
-
-}# if
-
-# write the filtered data to file
-write.csv(griis.other.filtered, "griis_data/griis_filtered_database.csv",
-          row.names = FALSE)
-
 #########################################################################
-##        DIVIDE SPECIES LIST INTO SUBSETS - HERE IT IS SET TO 48      ##
+##        DIVIDE SPECIES LIST INTO n SUBSETS -                         ##
 ##         BASED ON THE NUMBER OF EMAIL ADDRESSES AT OUR DISPOSAL      ##
 #########################################################################
 
 gbif.info = read.csv("email_addresses.csv")
 DIVISION.VAL = length(gbif.info$email.address) * 3
 
-# Divide the griis.other dataset into subsets
-griis.rows = nrow(griis.other.filtered)
+message(paste0("Read in ", nrow(gbif.info), " email addresses"))
 
-# if the dataset is small -> less than 48 spp, then don't divide it up into
+# Divide the input data into subsets
+synonym.rows = nrow(SYNONYM.LIST)
+
+message(paste0("Dividing data (n = ", synonym.rows, ") into ", DIVISION.VAL, " subsets"))
+
+# if the dataset is small -> less than n spp, then don't divide it up into
 # subsets at all
-if(griis.rows < DIVISION.VAL){
-  message(paste0("There are fewer than ", DIVISION.VAL, " species in the list"))
+if(synonym.rows < DIVISION.VAL){
+  message(paste0("There are fewer than ", 
+                 DIVISION.VAL, " species in the list. Subsetting not necessary."))
   divide.dataset.into = 1
 }# if
 
-if(griis.rows >= DIVISION.VAL){
-divide.dataset.into = DIVISION.VAL # there are 16 email addresses for this, each can 
-# run 3 simultaneous downloads -> total of 48 possible at a time
+if(synonym.rows >= DIVISION.VAL){
+divide.dataset.into = DIVISION.VAL # there are 17 email addresses for this, each can 
+# run 3 simultaneous downloads -> total of 51 possible at a time
 }#else
 
-remainder = griis.rows %% divide.dataset.into
-base_size = griis.rows %/% divide.dataset.into
+remainder = synonym.rows %% divide.dataset.into
+base_size = synonym.rows %/% divide.dataset.into
 
 # Adjust the sizes to account for the remainder
 sizes = rep(base_size, divide.dataset.into)
@@ -214,12 +77,12 @@ for (i in 1:length(sizes)) {
 data.subsets = list()
 
 for(p in 1:divide.dataset.into){
-  data.subsets[[p]] = griis.other.filtered[indices[[p]], ]
+  data.subsets[[p]] = SYNONYM.LIST[indices[[p]], ]
 }
 
-#View(as.data.frame(data.subsets[48]))
+#View(as.data.frame(data.subsets[51]))
 
-# create folders for each subset (here, divided into 48)
+# create folders for each subset (here, divided into 51)
 
 if(!dir.exists("RUNS")){
   dir.create("RUNS")
@@ -242,8 +105,8 @@ for(p in dirnums){
 ## GENERATE CUSTOMISED INPUT.CSV FILES FOR EACH INDIVIDUAL RUN FOLDER  ##
 #########################################################################
 
-input.file.template = data.frame(matrix(ncol = 10))
-colnames(input.file.template) = c("spp.file.path", "spp.name.column", "num.spp", 
+input.file.template = data.frame(matrix(ncol = 9))
+colnames(input.file.template) = c("spp.file.path", "num.spp", 
                                   "gbif.username", "gbif.password", "gbif.email",
                                   "iso.country.code", "koppengeiger.zone.numbers",
                                   "output.file.name", "keep.downloads")
@@ -267,12 +130,6 @@ if (length(iso.country.code) == 1) {
   input.file.template$iso.country.code[1] <- iso.country.code
 } else {
   input.file.template$iso.country.code <- iso.country.code
-}
-
-if (length(spp.name.column) == 1) {
-  input.file.template$spp.name.column[1] <- spp.name.column
-} else {
-  input.file.template$spp.name.column <- spp.name.column
 }
 
 if (length(num.spp) == 1) {
@@ -363,3 +220,5 @@ for(t in dirnums){
 }# for
 
 ##############################################################################
+
+message("Data prepared, and all the relevant folders written successfully :)")
