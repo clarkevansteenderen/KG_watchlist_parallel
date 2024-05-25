@@ -52,7 +52,7 @@ cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated
 module load chpc/BIOMODULES R/4.2.0
 export LANG=en_US.UTF-8 
 export LC_ALL=en_US.UTF-8
-Rscript divide_data.R
+nohup Rscript get_synonyms.R &> get_synonyms.out &
 for p in {1..48}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
 ```
 
