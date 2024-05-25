@@ -69,9 +69,11 @@ for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out"
 *change working directory*      
 ``module load chpc/BIOMODULES R/4.2.0``     
 *add the relevant R module*    
-``export LANG=en_US.UTF-8``   
-*type this to do away with warnings on startup of R*    
-``export LC_ALL=en_US.UTF-8 ``      
+```
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+```   
+*type this to do away with warnings on startup of R*     
 ``nohup Rscript get_synonyms.R &> get_synonyms.out &``   
 *get all species synonyms and alternative authority names on GBIF to create a larger input dataset. Sometimes a single query can yield no GBIF records, but if a synonym is given, there might be hundreds available! This check also includes potential misspelt names, and finds their closest matches. A logfile called **get_synonyms.out** will be written*     
 ``Rscript divide_data.R``   
