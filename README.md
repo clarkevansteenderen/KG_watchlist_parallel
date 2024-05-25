@@ -152,6 +152,7 @@ This collection of R scripts follows the pipeline below:
 * The ``get_synonyms.R`` script reads in the ``WATCHLIST_INPUT_FILE.txt`` file, sets all the required user parameters, filters the data accordingly, and finds all the synonyms on GBIF for each target species. This then creates a much larger input dataset.
 * ``get_synonyms.R`` calls the ``divide_data.R`` script, which divides the invasive species list into n subsets, and allocates each data subset to a different RUN folder. Each RUN folder also gets its own ``INPUT.csv`` folder, specifying the path to the data subset, GBIF credentials to enable downloading, and other parameters specified in the ``WATCHLIST_INPUT_FILE.txt`` as edited by the user.
 * ``KG_run_setup.R`` is called by ``KG_run.R``, and loads up the necessary libraries, reads in the input parameter file (``INPUT.csv``), creates output folders, and sets up the dataframes required for the analysis
+* ``check_output.R`` checks whether all n folders have been processed, indicating that the analysis is complete
 * ``combine_output.R`` combines the output from all n parallel runs back into one CSV file, and combines all the log files into one
 
 💡The only file that the user needs to change is ``WATCHLIST_INPUT_FILE.txt``. If specific changes need to be made to the filtering of the invasive species list before it is divided into n subsets (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
