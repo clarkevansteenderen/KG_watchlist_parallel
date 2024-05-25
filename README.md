@@ -48,7 +48,7 @@ An example of the console input could be (with explanations below):
 ```
 ssh cvansteenderen@globus.chpc.ac.za 
 Cryophytum2024@!
-cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated
+cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated_V2
 module load chpc/BIOMODULES R/4.2.0
 export LANG=en_US.UTF-8 
 export LC_ALL=en_US.UTF-8
