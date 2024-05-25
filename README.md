@@ -81,7 +81,7 @@ for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out"
 
 💡The nohup part of the code means "no hangup", and allows the user to run additional tasks while the previous task is running, and/or keeps the code running even if the user logs off the HPC
 
-To check whether all the runs are complete, run:
+### To check whether all the runs are complete, run:
 
 ```
 Rscript check_output.R
