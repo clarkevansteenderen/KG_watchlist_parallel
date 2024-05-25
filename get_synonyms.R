@@ -141,7 +141,7 @@ SPECNAMES = griis.other.filtered %>%
   as.data.frame()
 
 # small subset to test
-SPECNAMES = dplyr::slice(SPECNAMES, c(1:5))
+#SPECNAMES = dplyr::slice(SPECNAMES, c(1:5))
 
 for(t in 1:nrow(SPECNAMES)){
   
