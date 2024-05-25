@@ -35,12 +35,12 @@ Makhanda/Grahamstown
 
 ```mermaid
   graph LR;
-      A[get_synonyms.R] --> |CALLS| B[divide_data.R]
+      A[1. get_synonyms.R] --> |CALLS| B[2. divide_data.R]
       A -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt] & D>invasive species list] & E>endemic species list] 
       B -..- |READS IN| F>GBIF accounts details]
-      B --> G[KG_run.R]
-      G --> |CALLS| H[KG_run_setup.R]
-      G --> I[check_output.R] & J[combine_output.R]
+      B --> G[3. KG_run.R]
+      G --> |CALLS| H[4. KG_run_setup.R]
+      G --> I[5. check_output.R] & J[6. combine_output.R]
       J--o K[(WATCHLIST_OUTPUT.csv)] & L[(WATCHLIST_LOG_OUTPUT.csv)] & M[(GBIF_TAXONOMIC_ISSUES.csv)]
 ```
 
