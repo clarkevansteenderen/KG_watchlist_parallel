@@ -77,7 +77,7 @@ for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out"
 ``Rscript divide_data.R``   
 *divide the data in **n** subsets, and set up the analysis. A log file called **get_synonyms.out** will be written to track progress*    
 ``for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done``   
-*run the analysis, such that all **n** subsets are running in parallel. A log file will be written to each RUN(n) folder, called **RUN(n).out***     
+*run the analysis, such that all **n** (here n = 51) subsets are running in parallel. A log file will be written to each RUN(n) folder, called **RUN(n).out***     
 
 💡The nohup part of the code means "no hangup", and allows the user to run additional tasks while the previous task is running, and/or keeps the code running even if the user logs off the HPC
 
