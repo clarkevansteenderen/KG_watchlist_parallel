@@ -57,6 +57,8 @@ export LC_ALL=en_US.UTF-8
 nohup Rscript get_synonyms.R &> get_synonyms.out &
 nohup Rscript divide_data.R &> divide_data.out &    
 for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
+Rscript check_output.R
+Rscript combine_output.R    
 ```
 
 ### Explanations for each line:
