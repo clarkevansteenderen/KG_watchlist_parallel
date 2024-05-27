@@ -29,7 +29,7 @@ Makhanda/Grahamstown
 * cd (change the directory) to the relevant folder/directory on your HPC profile
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
 * Run ``nohup Rscript get_synonyms.R &> get_synonyms.out &`` to search for all the available synonyms for each species on GBIF      
-* Run ``Rscript divide_data.R`` to divide the invasive species list into **n** subsets (depending on the number of GBIF accounts available for use; e.g. 16 email addresses x 3 simultaneous downloads allowed per user = 48)
+* Run ``nohup Rscript divide_data.R &> divide_data.out &`` to divide the invasive species list into **n** subsets (depending on the number of GBIF accounts available for use; e.g. 16 email addresses x 3 simultaneous downloads allowed per user = 48)
 * Run ``for p in {1..n}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis 
 * Run ``Rscript check_output.R`` to see whether all the subsets completed successfully. If not, a list is returned of the folders that should be re-run
 * Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file
@@ -55,7 +55,7 @@ module load chpc/BIOMODULES R/4.2.0
 export LANG=en_US.UTF-8 
 export LC_ALL=en_US.UTF-8
 nohup Rscript get_synonyms.R &> get_synonyms.out &
-Rscript Rscript divide_data.R
+nohup Rscript divide_data.R &> divide_data.out &    
 for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
 ```
 
@@ -74,7 +74,7 @@ for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out"
 *type this to do away with warnings on startup of R*     
 ``nohup Rscript get_synonyms.R &> get_synonyms.out &``   
 *get all species synonyms and alternative authority names on GBIF to create a larger input dataset. Sometimes a single query can yield no GBIF records, but if a synonym is given, there might be hundreds available! This check also includes potential misspelt names, and finds their closest matches. A logfile called **get_synonyms.out** will be written*     
-``Rscript divide_data.R``   
+``nohup Rscript divide_data.R &> divide_data.out &``   
 *divide the data in **n** subsets, and set up the analysis. A log file called **get_synonyms.out** will be written to track progress*    
 ``for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done``   
 *run the analysis, such that all **n** (here n = 51) subsets are running in parallel. A log file will be written to each RUN(n) folder, called **RUN(n).out***     
