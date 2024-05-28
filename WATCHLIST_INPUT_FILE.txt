@@ -15,5 +15,6 @@ SPECIES NAME COLUMN	accepted_name.species
 ENDEMICS NAME COLUMN	full.tax.name
 KOPPEN-GEIGER ZONES	1, 2, 3, 14
 OUTPUT FILE NAME	final_sp_table.csv
-KEEP DOWNLOADS	n
-NUMBER OF SPECIES TO PROCESS		
+GBIF USERNAME	clarke.vansteenderen
+GBIF EMAIL	vsteenderen@gmail.com
+GBIF PASSWORD	roxie2@!

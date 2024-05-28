@@ -17,9 +17,6 @@
 # and a logfile of species that were not available from GBIF (LOGFILE.LIST.csv)
 # are written to file
 
-# (3) This script then calls "divide_data.R" to divide the data into multiple
-# smaller subsets and allocate them to individual run folders
-
 #################################################################
 ##                            SETUP                            ##
 #################################################################
@@ -30,20 +27,20 @@ library(readr)
 library(magrittr)
 library(dplyr)
 
-# change the divide.dataset.into value from 48 if you add more email addresses
-# also then edit the usernames and email addresses
-
 #################################################################
 ##                  GENERATE THE SPECIES LIST                  ##
 #################################################################
 
 # read in the input file with user-changed parameters
+
 input.params = read.delim("WATCHLIST_INPUT_FILE.txt", header = FALSE)
 colnames(input.params) = c("parameter", "choice")
 rownames(input.params) = input.params$parameter
 input.params = dplyr::select(input.params, !parameter)
 
 #################################################################
+
+message("\nREADING IN INVASIVE SPECIES...")
 
 # extract the relevant information
 griis.full = readr::read_delim(filter(input.params,
@@ -56,6 +53,8 @@ endemics.list.path = dplyr::filter(input.params,
 
 # if a path is provided, read in the endemics file
 if(endemics.list.path != ""){
+  
+  message("\nREADING IN ENDEMIC SPECIES...")
   # change read_delim depending on the format of the file (e.g. CSV)
   endemics.list = readr::read_delim(endemics.list.path)
   
@@ -85,6 +84,10 @@ spp.name.column = filter(input.params,
 ##                  GENERATE SPECIES LIST                  ##
 #################################################################
 
+message(paste0("\nFILTERING BY: \nCountry: ",
+               target.country, " \nTaxonomic kingdom: ", target.kingdom, 
+               "\nRemoving duplicates"))
+
 # Extract all the Mauritius records for Plantae that are invasive
 griis.target = dplyr::filter(griis.full, 
                              checklist.name == target.country,
@@ -102,6 +105,9 @@ griis.other = dplyr::filter(griis.full,
   dplyr::distinct(. , accepted_name.species, .keep_all = TRUE) %>%
   dplyr::arrange(., accepted_name.species) # order alphabetically
 
+message(paste0("\nREMOVING SPECIES ALREADY PRESENT IN ",
+               target.country))
+
 # remove any species in the Mauritius list (griis.target) 
 # FROM the "griis.other" list
 griis.other.filtered = griis.other %>%
@@ -114,6 +120,9 @@ griis.other.filtered = griis.other %>%
 # if a path was provided for endemics, then remove those from the list of 
 # invasive species not yet in MAU
 if(endemics.list.path != ""){
+  
+  message(paste0("\nREMOVING ", target.country, 
+                 " ENDEMIC SPECIES FROM THE LIST OF INVASIVES..."))
   
   # remove duplicates from the endemics list
   endemics.list = endemics.list %>%
@@ -133,11 +142,13 @@ if(endemics.list.path != ""){
 #             Get all synonyms for each input species                #
 ######################################################################
 
+message("\nSEARCHING FOR TAXONOMIC SYNONYMS AND ALTERNATIVE AUTHORITY NAMES...")
+
 SYNONYM.LIST = c()
 LOGFILE.LIST = c()
 
 SPECNAMES = griis.other.filtered %>%
-  dplyr::select(spp.name.column) %>%
+  dplyr::select(all_of(spp.name.column)) %>%
   as.data.frame()
 
 # small subset to test
@@ -149,23 +160,34 @@ for(t in 1:nrow(SPECNAMES)){
   
   tryCatch({
     
-    message(paste0("Getting synonyms for ", SPECNAMES[t,], ": ", t, " of ", 
+    message(paste0("GETTING SYNONMYMS FOR ", SPECNAMES[t,], ": ", t, " OF ", 
                    nrow(SPECNAMES)))
+    
+    ######################################################################
+    #                        GET SYNONYMS HERE                           #
+    ######################################################################
+    
+    # Here, I'm keeping only SPECIES entries (not HIGHERTAXON), and keeping
+    # exact matches, in case there are spelling differences
+    # I'm then removing any duplicate speciesKeys, and going with using
+    # the speciesKey for downloading records rather than usageKey that I used
+    # before
     
     synonyms.df = rgbif::name_backbone_checklist(SPECNAMES[t,], verbose=T) %>%
       dplyr::select(usageKey, scientificName, status, matchType,
                     canonicalName, rank, species, speciesKey) %>%
-      dplyr::filter(rank == "SPECIES", matchType %in% c("EXACT", "FUZZY")) %>%
+      dplyr::filter(rank == "SPECIES", matchType %in% c("EXACT"), 
+                    status == "ACCEPTED" | status == "SYNONYM") %>%
       # remove all duplicate speciesKey rows
       dplyr::distinct(speciesKey, .keep_all = TRUE)
   }, 
   error = function(e) {
     message(paste0("\nAn error occurred while fetching GBIF information for ", 
                    SPECNAMES[t,], ": ", 
-        conditionMessage(e), " ...moving on\n"))
+                   conditionMessage(e), " ...moving on\n"))
     
     return(NULL)  # Return NULL if usageKey is not found
-  })
+  })#tryCatch
   
   # Check if usageKey is NULL, indicating an error occurred
   if (is.null(synonyms.df)) {
@@ -185,21 +207,30 @@ for(t in 1:nrow(SPECNAMES)){
   synonyms.df$original.input.sp = SPECNAMES[t,]
   
   SYNONYM.LIST = dplyr::bind_rows(SYNONYM.LIST, synonyms.df)
-
+  
 }#for
 
-message(paste0("\nYour species list changed from ", nrow(SPECNAMES), " to ",
-               nrow(SYNONYM.LIST), " entries \n"))
+message(paste0("\nYOUR SPECIES LIST NOW CONTAINS ",
+               nrow(SYNONYM.LIST), " ENTRIES"))
 
 # SYNONYM.LIST is now the input list to use for the rest of the analysis
 # we can use the speciesKeys straight up now
 
-write.csv(SYNONYM.LIST, "FILTERED_SYNONYMS_INC_INPUT_DATA.csv", row.names = FALSE)
+if(!dir.exists("OUTPUTS")){
+  dir.create("OUTPUTS")
+}
+
+write.csv(SYNONYM.LIST, "OUTPUTS/FILTERED_SYNONYMS_INC_INPUT_DATA.csv", 
+          row.names = FALSE)
+message("UPDATED LIST OF INVASIVES WRITTEN TO OUTPUTS/")
 
 # if the log file is not empty, write to PC
 if(!is.null(LOGFILE.LIST)){
-write.csv(as.data.frame(LOGFILE.LIST), "NO_GBIF_RECS.csv", row.names = FALSE)
+  write.csv(as.data.frame(LOGFILE.LIST), 
+            "OUTPUTS/NO_GBIF_RECS.csv", row.names = FALSE)
+  message("LOG FILE WRITTEN TO OUTPUTS/")
+  
+  message(paste0("THESE SPECIES DID NOT HAVE GBIF RECORDS: \n",
+                 paste(LOGFILE.LIST, collapse = "\n") ))
 }#if
 
-message(paste0("These species did not have GBIF records: ",
-               paste(LOGFILE.LIST, collapse = ", ") ))
