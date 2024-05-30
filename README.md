@@ -111,7 +111,7 @@ This collection of R scripts follows the pipeline below:
 * Score the total, and proportion of, records present in each target KG zone, and also record whether there are any records from the focal country already      
 * Output a single summary table    
   
-💡The only file that the user needs to change is ``WATCHLIST_INPUT_FILE.txt``. If specific changes need to be made to the filtering of the invasive species list before it is divided into n subsets (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
+💡The only file that the user needs to change is ``WATCHLIST_INPUT_FILE.txt``. If specific changes need to be made to the filtering of the invasive species list before it is processed (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
 
 ## Troubleshooting
 
