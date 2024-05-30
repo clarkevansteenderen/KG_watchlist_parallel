@@ -131,7 +131,7 @@ Ensure that you are running this R script on a computer that has uninterrupted I
 
 ## 🐝 Input file
 
-Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list csv file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure that the same requirements are met for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything you like - just make sure that the relevant data is available at the path you have specified. The ``KEEP DOWNLOADS`` setting is best left at ``n``. This will save space on the HPC or on your hard drive, since the GBIF download will be deleted at the end of each iteration, after the relevant information has been extracted from it. If set to ``y``, each GBIF zipped folder will be stored (this can take up many GBs of space!).
+Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list csv file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure that the same requirements are met for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything you like - just make sure that the relevant data is available at the path you have specified. 
 
 ### Template WATCHLIST_INPUT_FILE.txt
 
@@ -144,8 +144,9 @@ Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file 
 ``ENDEMICS NAME COLUMN``	column in endemic species list specifying full taxonomic name (genus and species)    
 ``KOPPEN-GEIGER ZONES``	koppen-geiger zone numbers (see table below), separated by a comma    
 ``OUTPUT FILE NAME``	name_of_output_table.csv    
-``KEEP DOWNLOADS``	whether to keep each GBIF download (y or n)        
-``NUMBER OF SPECIES TO PROCESS`` optional to specify the number of species to process for a test run. If left blank, defaults to all species in the list    
+``GBIF USERNAME``	
+``GBIF EMAIL``	
+``GBIF PASSWORD``	
 
 ### Example WATCHLIST_INPUT_FILE.txt
 
@@ -158,8 +159,9 @@ Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file 
 ``ENDEMICS NAME COLUMN``	full.tax.name    
 ``KOPPEN-GEIGER ZONES``	1, 2, 3, 14    
 ``OUTPUT FILE NAME``	final_sp_table.csv    
-``KEEP DOWNLOADS``	n    
-``NUMBER OF SPECIES TO PROCESS``  		  
+``GBIF USERNAME``	clarke.vansteenderen    
+``GBIF EMAIL``	vsteenderen@gmail.com    
+``GBIF PASSWORD``	roxie2@! 		      
 
 ## 🐛 SPECIES LIST PATH -> the list of invasive species of interest
 
