@@ -144,9 +144,9 @@ Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file 
 ``ENDEMICS NAME COLUMN``	column in endemic species list specifying full taxonomic name (genus and species)    
 ``KOPPEN-GEIGER ZONES``	koppen-geiger zone numbers (see table below), separated by a comma    
 ``OUTPUT FILE NAME``	name_of_output_table.csv    
-``GBIF USERNAME``	
-``GBIF EMAIL``	
-``GBIF PASSWORD``	
+``GBIF USERNAME``	    
+``GBIF EMAIL``	    
+``GBIF PASSWORD``	    
 
 ### Example WATCHLIST_INPUT_FILE.txt
 
