@@ -37,7 +37,7 @@ Makhanda/Grahamstown
   ```
   awk -v lines_per_file=5000000 'NR==1 { next }
   { file=sprintf("/mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_%02d.csv",
-  int((NR-2)/lines_per_file)+1); print > file }' /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/0043931-240506114902167.csv
+  int((NR-2)/lines_per_file)+1); print > file }' /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.csv
   ```
   To split the GBIF file into multiple smaller ones - here each file will have 5,000,000 rows
 * Run
@@ -57,16 +57,15 @@ To remove the double header that the first file now has (it already had the orig
 
 ```mermaid
   graph LR;
-      A[1. get_synonyms.R] --> B[2. divide_data.R]
+      A[1. get_synonyms.R] --> B[2. prep.R]
       A -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt] & D>invasive species list] & E>endemic species list] 
       B -..- |READS IN| F>GBIF accounts details]
-      B --> G[3. KG_run.R]
-      G --> |CALLS| H[4. KG_run_setup.R]
-      G --> I[5. check_output.R] & J[6. combine_output.R]
-      J--o K[(WATCHLIST_OUTPUT.csv)] & L[(WATCHLIST_LOG_OUTPUT.csv)] & M[(GBIF_TAXONOMIC_ISSUES.csv)]
+      B --> G[3. KG_run_setup.R]
+      G --> H[4. KG_run.R]
+      H--o K[(WATCHLIST_OUTPUT.csv)]
 ```
 
-An example of the console input could be (with explanations below):      
+An example of the console input could be:      
 
 ```
 ssh cvansteenderen@globus.chpc.ac.za
