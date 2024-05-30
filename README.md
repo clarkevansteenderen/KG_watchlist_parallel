@@ -1,4 +1,4 @@
-# Köppen-Geiger watchlist: Parallel Processing 🗺️
+# Köppen-Geiger watchlist 🗺️
 ### Broad-scale Köppen-Geiger (KG) based climate matching to prioritise invasive species and generate watchlists
 
 -------------------------------------
@@ -29,10 +29,31 @@ Makhanda/Grahamstown
 * cd (change the directory) to the relevant folder/directory on your HPC profile
 * Add the most recent version of R as a module, e.g. ``module load chpc/BIOMODULES R/4.2.0``
 * Run ``nohup Rscript get_synonyms.R &> get_synonyms.out &`` to search for all the available synonyms for each species on GBIF      
-* Run ``nohup Rscript divide_data.R &> divide_data.out &`` to divide the invasive species list into **n** subsets (depending on the number of GBIF accounts available for use; e.g. 16 email addresses x 3 simultaneous downloads allowed per user = 48)
-* Run ``for p in {1..n}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done`` to trigger the analysis 
-* Run ``Rscript check_output.R`` to see whether all the subsets completed successfully. If not, a list is returned of the folders that should be re-run
-* Run ``Rscript combine_output.R`` to combine all the parallel runs into one output file and one log file
+* Run ``Rscript prep.R`` to prepare the required input files for the analysis
+* Run ``nohup Rscript KG_run_setup.R &> KG_run_setup.out &`` to start downloading from GBIF
+* Run ``unzip OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.zip -d OUTPUTS/GBIF_DATA/`` to unzip the GBIF folder that has downloaded. Replace **GBIF-DOWNLOAD-FILE-NAME**
+* Run ``head -n 1 /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.csv > OUTPUTS/GBIF_DATA/header.csv`` to extract the header/column names of the CSV file
+* Run
+  ```
+  awk -v lines_per_file=5000000 'NR==1 { next }
+  { file=sprintf("/mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_%02d.csv",
+  int((NR-2)/lines_per_file)+1); print > file }' /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/0043931-240506114902167.csv
+  ```
+  To split the GBIF file into multiple smaller ones - here each file will have 5,000,000 rows
+* Run
+```
+for file in /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_*; do
+  cat OUTPUTS/GBIF_DATA/header.csv "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+done
+```
+To add the header back into each smaller file
+* Run
+```
+first_file=$(ls /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_*.csv | head -n 1)
+sed -i '1d' "$first_file"
+```
+To remove the double header that the first file now has (it already had the original, and then got a second copy added)
+* Run ``nohup Rscript KG_run.R &> KG_run.out &`` to apply broad-scale climate matching for each smaller file, and collate them all again at the end
 
 ```mermaid
   graph LR;
@@ -48,99 +69,33 @@ Makhanda/Grahamstown
 An example of the console input could be (with explanations below):      
 
 ```
-ssh cvansteenderen@globus.chpc.ac.za 
+ssh cvansteenderen@globus.chpc.ac.za
 Cryophytum2024@!
 cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated_V2
 module load chpc/BIOMODULES R/4.2.0
 export LANG=en_US.UTF-8 
 export LC_ALL=en_US.UTF-8
 nohup Rscript get_synonyms.R &> get_synonyms.out &
-nohup Rscript divide_data.R &> divide_data.out &    
-for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
-Rscript check_output.R
-Rscript combine_output.R    
+Rscript prep.R       
+nohup Rscript KG_run_setup.R &> KG_run_setup.out &      
+unzip OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.zip -d OUTPUTS/GBIF_DATA/      
+head -n 1 /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.csv > OUTPUTS/GBIF_DATA/header.csv
+
+awk -v lines_per_file=5000000 'NR==1 { next }
+  { file=sprintf("/mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_%02d.csv",
+  int((NR-2)/lines_per_file)+1); print > file }' /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/0043931-240506114902167.csv
+
+for file in /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_*; do
+  cat OUTPUTS/GBIF_DATA/header.csv "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+done
+
+first_file=$(ls /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_*.csv | head -n 1)
+sed -i '1d' "$first_file"
+
+nohup Rscript KG_run.R &> KG_run.out &
 ```
-
-### Explanations for each line:
-
-``ssh cvansteenderen@globus.chpc.ac.za``    
-*ssh into the globus node*    
-``Cryophytum2024@!``     
-*HPC password*    
-``cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated``     
-*change working directory*      
-``module load chpc/BIOMODULES R/4.2.0``     
-*add the relevant R module*    
-``export LANG=en_US.UTF-8``      
-``export LC_ALL=en_US.UTF-8``      
-*type this to do away with warnings on startup of R*     
-``nohup Rscript get_synonyms.R &> get_synonyms.out &``   
-*get all species synonyms and alternative authority names on GBIF to create a larger input dataset. Sometimes a single query can yield no GBIF records, but if a synonym is given, there might be hundreds available! This check also includes potential misspelt names, and finds their closest matches. A logfile called **get_synonyms.out** will be written*     
-``nohup Rscript divide_data.R &> divide_data.out &``   
-*divide the data in **n** subsets, and set up the analysis. A log file called **get_synonyms.out** will be written to track progress*    
-``for p in {1..51}; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done``   
-*run the analysis, such that all **n** (here n = 51) subsets are running in parallel. A log file will be written to each RUN(n) folder, called **RUN(n).out***     
 
 💡The nohup part of the code means "no hangup", and allows the user to run additional tasks while the previous task is running, and/or keeps the code running even if the user logs off the HPC
-
-### To check whether all the runs are complete, run:
-
-```
-Rscript check_output.R
-```
-
-Which will produce one of two messages:
-
-```ALL n RUNS COMPLETED SUCCESSFULLY``` 
-
-or a list of folder RUN numbers that did not complete (e.g. 1 and 3)
-
-```
-These subsets did not complete: 1 3
-Run this on the command line (or HPC):
-for p in 1 3; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
-```
-
-Combine output if everything is done:
-
-```
-Rscript combine_output.R
-```
-
-Which should write this to the console:
-
-```MISSING SPECIES FILE WRITTEN TO: `~path/MISSING_SPECIES.csv```    
-```FINAL WATCHLIST FILE WRITTEN TO: ~path/WATCHLIST_OUTPUT.csv```    
-```GBIF TAXONOMIC ISSUES FILE WRITTEN TO: ~path/GBIF_TAXONOMIC_ISSUES.csv```    
-```FINAL LOG FILE WRITTEN TO: ~path/WATCHLIST_LOG_OUTPUT.txt```    
-
-✏️ MISSING SPECIES is a list of all the species names in the input list of invasives that did not download from GBIF. This could be due to formatting issues, missing GPS data, or some other glitch in the GBIF file      
-✏️ FINAL WATCHLIST is the most important file, listing all the species on the watchlist    
-✏️ GBIF TAXONOMIC ISSUES lists the species that most likely had issues with taxonomic synonyms, and only downloaded some of the records available    
-✏️ FINAL LOG is a text file that is written as the analysis runs, logging problem species as it progresses    
-
-### To re-run specific folders/subsets of choice (e.g. 23, 32, 37, 38, and 46), you can run:    
-
-💡The **check_output.R** script will display which RUN folders have no output. These can be re-run.
-
-```
-ssh cvansteenderen@globus.chpc.ac.za 
-Cryophytum2024@!
-cd /mnt/lustre/users/cvansteenderen/kg_watchlist_MULTI_automated
-module load chpc/BIOMODULES R/4.2.0
-export LANG=en_US.UTF-8 
-export LC_ALL=en_US.UTF-8
-for p in 23 32 37 38 46; do nohup Rscript KG_run.R "${p}" &> "RUNS/RUN${p}/RUN${p}.out" & done
-Rscript check_output.R
-```
-
-If all RUN folders now have output, combine all the results:
-
-```
-Rscript combine_output.R
-```
-
-💡Note that the ``get_synonyms.R`` and ``divide_data.R`` scripts are not run again here, as they were already run the first time around.  We just need to run ``KG_run.R`` again for the target folders.
 
 ## 🪲 Workflow
 
