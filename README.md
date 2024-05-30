@@ -102,8 +102,7 @@ This collection of R scripts follows the pipeline below:
 
 * Input an Excel file containing a list of the genus and species names of invasive organisms of interest (e.g. from the Global Register of Introduced and Invasive Species [GRIIS](https://griis.org/) database)    
 * Input the name of a country that is under potential threat from these species (focal country)     
-* Remove all (1) all taxa already recorded in the focal country, and (2) endemic species (if available) from the list      
-* The list of species will be divided into 48 smaller subsets to enable parallel processing. Each GBIF user is only allowed three simultaneous downloads. To get around this, there are 16 available email addresses, as listed in the **``email_addresses.csv``** file. Using all at once means that 48 downloads can run concurrently (16 x 3). This is why the original invasive species list is divided into 48 subsets, where groups of three can be allocated to a single GBIF user account. Each of the 48 RUN folders will contain an **``INPUT.csv``** file, specifying which GBIF user account to draw from, and the relevant login details.    
+* Remove all (1) all taxa already recorded in the focal country, and (2) endemic species (if available) from the list       
 * Input a list of the Köppen-Geiger zones present in the focal country      
 * Download all occurence records from GBIF for the taxa in the input list      
 * Extract the KG climate zone for each occurence record (GPS location)     
@@ -111,19 +110,7 @@ This collection of R scripts follows the pipeline below:
 * Score the total number of records per species that share a KG zone with the focal country, and the overall proportion        
 * Score the total, and proportion of, records present in each target KG zone, and also record whether there are any records from the focal country already      
 * Output a single summary table    
-* A logfile will be written to the directory, called ``SKIPPED_SP_LOGFILE.txt``, which will display a list of any species names where errors occurred. These species are skipped.
-
-<img src="workflow.png" width="800">
-
-## 👓 Code layout
-
-* The ``KG_run.R`` is where the analysis is set in motion
-* The ``get_synonyms.R`` script reads in the ``WATCHLIST_INPUT_FILE.txt`` file, sets all the required user parameters, filters the data accordingly, and finds all the synonyms on GBIF for each target species. This then creates a much larger input dataset.
-* ``get_synonyms.R`` calls the ``divide_data.R`` script, which divides the invasive species list into n subsets, and allocates each data subset to a different RUN folder. Each RUN folder also gets its own ``INPUT.csv`` folder, specifying the path to the data subset, GBIF credentials to enable downloading, and other parameters specified in the ``WATCHLIST_INPUT_FILE.txt`` as edited by the user.
-* ``KG_run_setup.R`` is called by ``KG_run.R``, and loads up the necessary libraries, reads in the input parameter file (``INPUT.csv``), creates output folders, and sets up the dataframes required for the analysis
-* ``check_output.R`` checks whether all n folders have been processed, indicating that the analysis is complete
-* ``combine_output.R`` combines the output from all n parallel runs back into one CSV file, and combines all the log files into one
-
+  
 💡The only file that the user needs to change is ``WATCHLIST_INPUT_FILE.txt``. If specific changes need to be made to the filtering of the invasive species list before it is divided into n subsets (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
 
 ## Troubleshooting
