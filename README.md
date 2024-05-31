@@ -1,7 +1,9 @@
-# Köppen-Geiger watchlist 🗺️
-### Broad-scale Köppen-Geiger (KG) based climate matching to prioritise invasive species and generate watchlists
+# WatchListR
+## Broad-scale Köppen-Geiger (KG) climate matching to generate watchlists for invasive species 
 
 -------------------------------------
+
+<img src="logo.png" width="300" height="350">
 
 **Clarke J.M van Steenderen**    
 clarke.vansteenderen@ru.ac.za  
