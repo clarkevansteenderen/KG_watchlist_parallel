@@ -2,14 +2,30 @@
 ##                         CODE RUNDOWN                         ##
 ##################################################################
 
-# This script sets everything up for the analysis to start running, and is
-# sourced by the KG_run.R script. 
+# This script reads in the PARAMETERS.csv file with the info needed to
+# download from GBIF
 
-# The koppen-geiger shape file is read in, as well as the subsetted species
-# list present in that particular RUNS/RUN(n) folder
+# The input species list is the one that contains all synonyms from GBIF,
+# and uses the speciesKey of each to download from GBIF
 
-# The rest of the script sets up the data frame with its necessary columns
-# to which the summary data will be written 
+# In this approach, the whole list of speciesKey numbers are supplied at once
+# as a vector, and GBIF generates one very large output zipped folder with all
+# the results (the Mauritius folder contained 180,575,480 records for 4002 spp)
+
+# The folder is downloaded to OUTPUTS/GBIF_DATA
+
+# The next steps need to be run on the Linux command line before the last
+# R script can be run
+
+# The GBIF folder is enormous, and can't be read into R as one file. The folder
+# needs to be unzipped and divided into multiple smaller files. Here, I've 
+# called them chunk_n, where n = 1 to about 180-200 subfiles. Dividing each
+# file into 1 million rows works well
+
+# The column headers then need to be appended back onto each subset
+
+# Now the KG_run.R script can be run, taking each chunk_n file in turn and
+# applying coarse climate matching based on shared KG zones
 
 #########################################################################
 # Session setup 1
@@ -24,6 +40,7 @@ library(readxl)
 library(magrittr)
 library(dplyr)
 library(purrr)
+library(vroom)
 
 #########################################################################
 # Session setup 2
@@ -41,21 +58,7 @@ iso.country.code = user.input$iso.country.code %>%
 kopgeig.zone.nums = user.input$koppengeiger.zone.numbers %>%
   purrr::keep(nzchar)
 
-output_file_name = user.input$output.file.name  %>%
-  purrr::keep(nzchar)
-
 #########################################################################
-
-#########################################################################
-# Import KG map
-#########################################################################
-
-kg_map <- terra::rast("koppen_geiger/Beck_KG_V1_present_0p0083.tif")
-
-# Set the CRS projection for the current climate layers 
-# - Use the correct wkt CRS format 
-terra::crs(kg_map) = "epsg:4326"
-terra::crs(kg_map, describe = T)
 
 # The list of species to assess
 file_url = user.input$spp.file.path[1]
@@ -77,3 +80,63 @@ species_keys = watchlist_file %>%
 if (!dir.exists("OUTPUTS/GBIF_DATA")) {
   dir.create("OUTPUTS/GBIF_DATA")
 }
+
+#########################################################################
+# Record the start time
+#########################################################################
+
+start_time = Sys.time()
+
+#########################################################################
+
+message(paste0("DOWNLOAD STARTED AT ", Sys.time()))
+
+# Download records for the taxon keys
+
+gbif_download = rgbif::occ_download(
+  rgbif::pred_in("speciesKey", species_keys),
+  format = "SIMPLE_CSV",
+  user = user.input$gbif.username[1],
+  pwd = user.input$gbif.password[1],
+  email = user.input$gbif.email[1]
+)
+
+message("\nDOWNLOADING FROM GBIF...")
+
+rgbif::occ_download_wait(gbif_download, 
+                         quiet = FALSE, 
+                         status_ping = 3) 
+
+result = rgbif::occ_download_get(key = gbif_download, 
+                                 overwrite = TRUE, path = paste0("OUTPUTS/GBIF_DATA/"))
+
+#########################################################################
+# Record end time
+#########################################################################
+end_time = Sys.time()
+#########################################################################
+# Calculate the time taken
+#########################################################################
+time_taken = round(end_time - start_time, 2)
+#########################################################################
+message(paste0("Processing completed in ", round(time_taken, 2), " minutes"))
+#########################################################################
+
+
+# AT THIS POINT, THE ZIPPED FILE NEEDS TO BE UNZIPPED AND SPLIT TO MAKE IT MANAGEABLE
+# NEEDS TO BE DONE IN LINUX FIRST
+
+############################# STEPS #################################
+
+############ IN LINUX##############
+
+# # unzip the gbif download
+# # extract the header columns from the unzipped CSV
+# # split the csv into separate smaller files, specifying the number of rows in each
+# # add the header back onto each file
+# 
+############ IN R ##################
+# 
+# nohup Rscript KG_run.R &> KG_run.out &
+
+

@@ -8,14 +8,16 @@
 # endemic species for the target country. Then:
 
 # (1) The full list of invasive species is filtered such that species are
-# removed that are already present in the target country, and that are natives
+# removed that are already present in the target country, and native species
 
 # (2) Each species is queried on GBIF to find all the synonyms and alternative
 # authority names that might exist for that species. A new dataframe is
 # compiled with all of these additional entries and speciesKeys to create an
-# input list for the next phase of the analysis. This new dataframe (SYNONYM.LIST.csv)
-# and a logfile of species that were not available from GBIF (LOGFILE.LIST.csv)
-# are written to file
+# input list for the next phase of the analysis. This new dataframe 
+# (FILTERED_SYNONYMS_INC_INPUT_DATA.csv.csv) and a logfile of species 
+# that were not available from GBIF (NO_GBIF_RECS.csv) are written to file
+
+# Getting all synonyms from GBIF can take a few minutes
 
 #################################################################
 ##                            SETUP                            ##
@@ -26,6 +28,12 @@ library(tidyr)
 library(readr)
 library(magrittr)
 library(dplyr)
+
+####################################################################
+# Record starting time
+####################################################################
+start.time = Sys.time()
+####################################################################
 
 #################################################################
 ##                  GENERATE THE SPECIES LIST                  ##
@@ -160,7 +168,7 @@ for(t in 1:nrow(SPECNAMES)){
   
   tryCatch({
     
-    message(paste0("GETTING SYNONMYMS FOR ", SPECNAMES[t,], ": ", t, " OF ", 
+    message(paste0("GETTING SYNONYMS FOR ", SPECNAMES[t,], ": ", t, " OF ", 
                    nrow(SPECNAMES)))
     
     ######################################################################
@@ -210,8 +218,9 @@ for(t in 1:nrow(SPECNAMES)){
   
 }#for
 
-message(paste0("\nYOUR SPECIES LIST NOW CONTAINS ",
-               nrow(SYNONYM.LIST), " ENTRIES"))
+message(paste0("\nYOUR SPECIES LIST CONTAINS: \n",
+               nrow(SYNONYM.LIST), " ENTRIES\n",
+               "YOUR ORIGINAL LIST CONTAINED: ", length(SPECNAMES)))
 
 # SYNONYM.LIST is now the input list to use for the rest of the analysis
 # we can use the speciesKeys straight up now
@@ -222,15 +231,30 @@ if(!dir.exists("OUTPUTS")){
 
 write.csv(SYNONYM.LIST, "OUTPUTS/FILTERED_SYNONYMS_INC_INPUT_DATA.csv", 
           row.names = FALSE)
-message("UPDATED LIST OF INVASIVES WRITTEN TO OUTPUTS/")
+
+message("\nUPDATED LIST OF INVASIVES WRITTEN TO OUTPUTS/FILTERED_SYNONYMS_INC_INPUT_DATA.csv")
 
 # if the log file is not empty, write to PC
 if(!is.null(LOGFILE.LIST)){
   write.csv(as.data.frame(LOGFILE.LIST), 
             "OUTPUTS/NO_GBIF_RECS.csv", row.names = FALSE)
-  message("LOG FILE WRITTEN TO OUTPUTS/")
+  message("\nLOG FILE WRITTEN TO OUTPUTS/NO_GBIF_RECS.csv")
   
-  message(paste0("THESE SPECIES DID NOT HAVE GBIF RECORDS: \n",
+  message(paste0("\nTHESE SPECIES DID NOT HAVE GBIF RECORDS: \n",
                  paste(LOGFILE.LIST, collapse = "\n") ))
 }#if
+
+
+#########################################################################
+# Record end time
+#########################################################################
+end_time = Sys.time()
+#########################################################################
+# Calculate the time taken
+#########################################################################
+time_taken = round(end_time - start_time, 2)
+#########################################################################
+message(paste0("\nProcessing completed in ", round(time_taken, 2), " minutes"))
+#########################################################################
+
 

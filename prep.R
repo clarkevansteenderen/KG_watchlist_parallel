@@ -2,6 +2,11 @@
 ##                         CODE RUNDOWN                         ##
 ##################################################################
 
+# This short script creates a CSV file that contains the input
+# information needed to start downloading from GBIF. It also reads in
+# the WATCHLIST_INPUT_FILE.txt input file that the user has edited.
+# The output parameter file is saved as "PARAMETERS.csv"
+
 #################################################################
 ##                            SETUP                            ##
 #################################################################
@@ -36,10 +41,6 @@ koppengeiger.zones = filter(input.params,
 
 koppengeiger.zones = as.numeric(unlist(strsplit(koppengeiger.zones, ",\\s*")))
 
-output.file.name = filter(input.params,
-                          row.names(input.params) %in% 
-                            c("OUTPUT FILE NAME"))$choice
-
 gbif.username = filter(input.params,
                        row.names(input.params) %in% 
                          c("GBIF USERNAME"))$choice
@@ -53,25 +54,15 @@ gbif.password = filter(input.params,
                          c("GBIF PASSWORD"))$choice
 
 #########################################################################
-##                      READ IN SPECIES LIST                           ##
-#########################################################################
-
-SYNONYM.LIST = read.csv("OUTPUTS/FILTERED_SYNONYMS_INC_INPUT_DATA.csv")
-
-#########################################################################
-#########################################################################
-
-#########################################################################
 ## GENERATE CUSTOMISED INPUT.CSV FILE                                  ##
 #########################################################################
 
 message("\nCREATING INPUT FILE...")
 
-input.file.template = data.frame(matrix(ncol = 7))
+input.file.template = data.frame(matrix(ncol = 6))
 colnames(input.file.template) = c("spp.file.path", 
                                   "gbif.username", "gbif.password", "gbif.email",
-                                  "iso.country.code", "koppengeiger.zone.numbers",
-                                  "output.file.name")
+                                  "iso.country.code", "koppengeiger.zone.numbers")
 
 ##############################################################################
 
@@ -92,12 +83,6 @@ if (length(iso.country.code) == 1) {
   input.file.template$iso.country.code[1] = iso.country.code
 } else {
   input.file.template$iso.country.code = iso.country.code
-}
-
-if (length(output.file.name) == 1) {
-  input.file.template$output.file.name[1] = output.file.name
-} else {
-  input.file.template$output.file.name = output.file.name
 }
 
 if (length(koppengeiger.zones) == 1) {
