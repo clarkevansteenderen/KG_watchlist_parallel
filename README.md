@@ -22,7 +22,7 @@ Makhanda/Grahamstown
 
 -------------------------------------
 
-## :spider: Run instructions
+## :spider: Run instructions (Linux environment)
 
 * Download this GitHub repository, and unzip the project folder
 * Edit the **``WATCHLIST_INPUT_FILE.txt``** according to the specific project requirements    
@@ -33,28 +33,8 @@ Makhanda/Grahamstown
 * Run ``nohup Rscript get_synonyms.R &> get_synonyms.out &`` to search for all the available synonyms for each species on GBIF      
 * Run ``Rscript prep.R`` to prepare the required input files for the analysis
 * Run ``nohup Rscript KG_run_setup.R &> KG_run_setup.out &`` to start downloading from GBIF
-* Run ``unzip OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.zip -d OUTPUTS/GBIF_DATA/`` to unzip the GBIF folder that has downloaded. Replace **GBIF-DOWNLOAD-FILE-NAME**
-* Run ``head -n 1 /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.csv > OUTPUTS/GBIF_DATA/header.csv`` to extract the header/column names of the CSV file
-* Run
-  ```
-  awk -v lines_per_file=5000000 'NR==1 { next }
-  { file=sprintf("/mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_%02d.csv",
-  int((NR-2)/lines_per_file)+1); print > file }' /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.csv
-  ```
-  To split the GBIF file into multiple smaller ones - here each file will have 5,000,000 rows
-* Run
-```
-for file in /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_*; do
-  cat OUTPUTS/GBIF_DATA/header.csv "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
-done
-```
-To add the header back into each smaller file
-* Run
-```
-first_file=$(ls /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_*.csv | head -n 1)
-sed -i '1d' "$first_file"
-```
-To remove the double header that the first file now has (it already had the original, and then got a second copy added)
+* Run ``chmod +x split_gbif.sh`` to make the shell script executable
+* Run ``./split_gbif.sh`` to run the shell script that divides the large GBIF zipped folder into multiple small CSV files/chunks that are more manageable (i.e. can be read into R!)
 * Run ``nohup Rscript KG_run.R &> KG_run.out &`` to apply broad-scale climate matching for each smaller file, and collate them all again at the end
 
 ```mermaid
@@ -79,21 +59,9 @@ export LC_ALL=en_US.UTF-8
 nohup Rscript get_synonyms.R &> get_synonyms.out &
 Rscript prep.R       
 nohup Rscript KG_run_setup.R &> KG_run_setup.out &      
-unzip OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.zip -d OUTPUTS/GBIF_DATA/      
-head -n 1 /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/GBIF-DOWNLOAD-FILE-NAME.csv > OUTPUTS/GBIF_DATA/header.csv
-
-awk -v lines_per_file=5000000 'NR==1 { next }
-  { file=sprintf("/mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_%02d.csv",
-  int((NR-2)/lines_per_file)+1); print > file }' /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/0043931-240506114902167.csv
-
-for file in /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_*; do
-  cat OUTPUTS/GBIF_DATA/header.csv "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
-done
-
-first_file=$(ls /mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA/chunk_*.csv | head -n 1)
-sed -i '1d' "$first_file"
-
-nohup Rscript KG_run.R &> KG_run.out &
+chmod +x split_gbif.sh      
+./split_gbif.sh      
+nohup Rscript KG_run.R &> KG_run.out &      
 ```
 
 💡The nohup part of the code means "no hangup", and allows the user to run additional tasks while the previous task is running, and/or keeps the code running even if the user logs off the HPC
