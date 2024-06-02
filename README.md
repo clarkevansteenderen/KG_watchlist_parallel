@@ -33,8 +33,8 @@ Makhanda/Grahamstown
 * Run ``nohup Rscript get_synonyms.R &> get_synonyms.out &`` to search for all the available synonyms for each species on GBIF      
 * Run ``Rscript prep.R`` to prepare the required input files for the analysis
 * Run ``nohup Rscript KG_run_setup.R &> KG_run_setup.out &`` to start downloading from GBIF
-* Run ``chmod +x split_gbif.sh`` to make the shell script executable
-* Run ``./split_gbif.sh`` to run the shell script that divides the large GBIF zipped folder into multiple small CSV files/chunks that are more manageable (i.e. can be read into R!)
+* Run ``chmod +x split_gbif.sh`` to make the **split_gbif.sh** shell script executable
+* Run ``./split_gbif.sh`` to run **split_gbif.sh**, which divides the large GBIF zipped folder into multiple small CSV files/chunks that are more manageable (i.e. can be read into R!)
 * Run ``nohup Rscript KG_run.R &> KG_run.out &`` to apply broad-scale climate matching for each smaller file, and collate them all again at the end
 
 ```mermaid
@@ -43,8 +43,9 @@ Makhanda/Grahamstown
       A -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt] & D>invasive species list] & E>endemic species list] 
       B -..- |READS IN| F>GBIF accounts details]
       B --> G[3. KG_run_setup.R]
-      G --> H[4. KG_run.R]
-      H--o K[(WATCHLIST_OUTPUT.csv)]
+      G --> H[4. split_gbif.sh]
+      H --> I[5. KG_run.R]
+      I--o J[(WATCHLIST_OUTPUT.csv)]
 ```
 
 An example of the console input could be:      
