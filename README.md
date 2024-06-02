@@ -82,23 +82,13 @@ This collection of R scripts follows the pipeline below:
 * Score the total, and proportion of, records present in each target KG zone, and also record whether there are any records from the focal country already      
 * Output a single summary table    
   
-💡The only file that the user needs to change is ``WATCHLIST_INPUT_FILE.txt``. If specific changes need to be made to the filtering of the invasive species list before it is processed (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
+💡The only files that the user needs to change are 1) ``WATCHLIST_INPUT_FILE.txt`` and 2) ``split_gbif.sh`` (namely the file path for the project, and the number of rows to divide the large GBIF file into). If specific changes need to be made to the filtering of the invasive species list before it is processed (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
 
 ## Troubleshooting
 
-⚠️ There may be times when the GBIF database is down or experiencing errors. For example, the error:    
-``Timeout was reached: [occurrence-download.gbif.org] SSL/TLS connection timeout``, or        
-``OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to api.gbif.org:443`` might appear.    
-Check the progress of the script run regularly. If an error occurred, write the latest version of the ``super_table`` object to the project directory as a CSV file, and create a new subset of your species list file from the last species that was processed. Use this as the new input, and re-run the script
-
-⚠️ If a GBIF file is too large to read back into the R environment, an error might pop up saying something like this:    
-``Opened 23.69GB (25433215792 bytes) file ok but could not memory map it. This is a 64bit process. There is probably not enough contiguous virtual memory available``    
-Search the R script for the following line:    
-``import_back_file <- rgbif::occ_download_import(result, nrows = 500000)``, and change ``nrows`` to a smaller value. Rerun the script, which now limits the number of rows read in. Alternatively, change the ``keep.downloads`` parameter in the INPUT.csv file to ``n``, which will automatically delete each downloaded folder after the relevant information has been extracted
-
 ⚠️ If your Internet connection is unstable, you might get the error:    
 ``Error occurred while fetching usageKey for species_name : any(content_types == "application/json") is not TRUE ``    
-Ensure that you are running this R script on a computer that has uninterrupted Internet access and electricity supply
+Ensure that you are running this R script on a computer that has an uninterrupted Internet connection and electricity supply
 
 ## 🐝 Input file
 
@@ -204,56 +194,13 @@ In the example, the focal country is Mauritius (``MU``). The KG zones in this co
 
 An example output **final_sp_table.csv** might be (showing just the first two species):
 
-| species | total_n | total_records_in_kg | prop_records_in_kg | total_records_in_1 | prop_records_in_1 | total_records_in_2 | prop_records_in_2 | total_records_in_3 | prop_records_in_3 | total_records_in_14 | prop_records_in_14 | total_records_in_15 | prop_records_in_15 | n_records_in_target_countries | citation | mins | size.mb |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Abelmoschus moschatus | 1389 | 1073 | 77.25 | 349 | 25.126 | 176 | 12.671 | 372 | 26.782 | 165 | 11.879 | 11 | 0.792 | 19 | https://doi.org/10.15468/dl.frq6xw | 2.15 | 8.2 |
-| Abies alba | 68628 | 23643 | 34.45 | 0 | 0 | 0 | 0 | 1 | 0.001 | 195 | 0.28 | 23447 | 34.17 | 0 | https://doi.org/10.15468/dl.h57gnu | 12.74 | 18.31 |
+| species | total_n | total_records_in_kg | prop_records_in_kg | total_records_in_1 | prop_records_in_1 | total_records_in_2 | prop_records_in_2 | total_records_in_3 | prop_records_in_3 | total_records_in_14 | prop_records_in_14 | total_records_in_15 | prop_records_in_15 | n_records_in_target_countries |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Abelmoschus moschatus | 1389 | 1073 | 77.25 | 349 | 25.126 | 176 | 12.671 | 372 | 26.782 | 165 | 11.879 | 11 | 0.792 | 19 | 
+| Abies alba | 68628 | 23643 | 34.45 | 0 | 0 | 0 | 0 | 1 | 0.001 | 195 | 0.28 | 23447 | 34.17 | 0 |
 
-This table indicates that there were 1389 *A. moschatus* species downloaded from GBIF, and that 1073 of these shared KG zone/s with the KG zones present in Mauritius and Reunion (77%). Approximately 25% of the species records fell into KG zone 1, 13% in zone 2, 27% in zone 3, 12% in zone 14, and 1% in zone 15. A total of 19 of the 1389 records were already present in these two countries (1.4%). The GBIF doi is recorded, the time taken in minutes for each species to download, and the size of the data folder in megabytes. *Abies alba* seems to pose a lower threat, as only 34.5% of its records occurred in KG zones present in MU and RE. The bulk of these records (34.2%) came from KG zone 15 (temperate, no dry season, warm summer).
+This table indicates that there were 1389 *A. moschatus* species downloaded from GBIF, and that 1073 of these shared KG zone/s with the KG zones present in Mauritius and Reunion (77%). Approximately 25% of the species records fell into KG zone 1, 13% in zone 2, 27% in zone 3, 12% in zone 14, and 1% in zone 15. A total of 19 of the 1389 records were already present in these two countries (1.4%). *Abies alba* seems to pose a lower threat, as only 34.5% of its records occurred in KG zones present in MU and RE. The bulk of these records (34.2%) came from KG zone 15 (temperate, no dry season, warm summer).
 
-To create thresholded lists, one can read in the output table and subset it:
-
-```{r}
-full.table = read.csv("results/summary/supertable_full.csv")
-
-# set the threshold for the total proportion of shared KG climates
-thresh = 95
-
-# filter such that only species with 50 or more occurrence records are kept
-# save this list
-full.table.thresh = dplyr::filter(full.table, prop_records_in_kg >= thresh & 
-                                      total_n >= 50)
-
-# rename columns accordingly for optional ggplots
-full.table.thresh.subset = full.table.thresh %>% 
-  dplyr::select(species, contains("prop_records_in"), -prop_records_in_kg) %>%
-  dplyr::rename(Af = prop_records_in_1,
-                Am = prop_records_in_2,
-                Aw = prop_records_in_3,
-                Cfa = prop_records_in_14,
-                Cfb = prop_records_in_15)
-
-# prepare for ggplot
-full.table.thresh.long = reshape2::melt(full.table.thresh.subset) 
-
-climate.bars = ggplot(data = full.table.thresh.long, 
-                      # reorder puts them in descending order
-                      aes(x = reorder(species, -value), y = value, fill = variable)) +
-  # use dodge to not stack
-  geom_bar(stat = "identity", position = "stack", colour = "black", alpha = 0.5) +
-  scale_fill_manual(values = c("black", "royalblue", "yellow", 
-                               "purple")) +
-  labs(title = paste0("KG similarity over ", thresh, "% (n = ", num.spp.thresh, ")"),
-       x = "Species",
-       y = "Proportion of Records (%)",
-       fill = "KG climate zone") +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7)) +
-  theme(axis.text.x = element_text(face = "italic")) +
-  coord_flip()
-
-# save plot
-ggsave(plot = climate.bars, filename = "bars.png", dpi = 450, height = 7, width = 10)
-```
+The ggplot.R script can thresholded the output list to produce graphics like this:
 
 <img src="bars.png" width="800">
