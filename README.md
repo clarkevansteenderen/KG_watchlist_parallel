@@ -24,12 +24,12 @@ Makhanda/Grahamstown
 
 ## 📖 Summary
 
-The WatchListR pipeline is targeted to any country of interest, and uses a global list of invasive species and a list of the target country's endemic species to generate a list of potential invaders that may be of concern. All the available data on the GBIF database for the species in this list of potential invaders are downloaded, and the associated GPS records for each entry are scored as a Köppen-Geiger climate zone. These scored climate zones are subsequently matched to the climate zones present in the target country in order to determine those species with the highest climatic overlap.
+The ``WatchListR`` pipeline is targeted to any country of interest, and uses a global list of invasive species to generate a [watch]list of potential invaders that may be of concern based on a broad-scale climate matching approach. All available GBIF data for the species in this watchlist are downloaded, and the associated GPS records for each entry are scored as a Köppen-Geiger climate zone. The scored climate zones are subsequently matched to the climate zones present in the target country in order to determine the degree of climatic overlap for each species.
 
-## :spider: Run instructions (Linux environment)
+## Run instructions (Linux environment)
 
 * Download this GitHub repository, and unzip the project folder
-* Edit the **``WATCHLIST_INPUT_FILE.txt``** according to the specific project requirements    
+* Edit the **``WATCHLIST_INPUT_FILE.txt``** and the **split_gbif.sh** files according to the specific project requirements    
 * Upload the project folder to your profile on a High Performance Computer (HPC) of choice
 * Access a node of the HPC that has access to the Internet (since GBIF downloads require an Internet connection), e.g ``ssh cvansteenderen@globus.chpc.ac.za``
 * cd (change the directory) to the relevant folder/directory on your HPC profile
@@ -71,19 +71,18 @@ nohup Rscript KG_run.R &> KG_run.out &
 
 💡The nohup part of the code means "no hangup", and allows the user to run additional tasks while the previous task is running, and/or keeps the code running even if the user logs off the HPC
 
-## 🪲 Workflow
+## Workflow
 
 This collection of R scripts follows the pipeline below:
 
-* Input an Excel file containing a list of the genus and species names of invasive organisms of interest (e.g. from the Global Register of Introduced and Invasive Species [GRIIS](https://griis.org/) database)    
+* Input a CSV file containing a list of the genus and species names of invasive organisms of interest (e.g. from the Global Register of Introduced and Invasive Species [GRIIS](https://griis.org/) database)    
 * Input the name of a country that is under potential threat from these species (focal country)     
-* Remove all (1) all taxa already recorded in the focal country, and (2) endemic species (if available) from the list       
+* Remove (1) all taxa already recorded in the focal country, and (2) endemic species (if available) from the list       
 * Input a list of the Köppen-Geiger zones present in the focal country      
-* Download all occurence records from GBIF for the taxa in the input list      
+* Download all occurence records from the Global Biodiversity Information Facility [GBIF](https://www.gbif.org/) database for the taxa in the input list      
 * Extract the KG climate zone for each occurence record (GPS location)     
 * Score whether the KG zones where the invasive species occur are shared with the KG zones present in the focal country (0 or 1)    
-* Score the total number of records per species that share a KG zone with the focal country, and the overall proportion        
-* Score the total, and proportion of, records present in each target KG zone, and also record whether there are any records from the focal country already      
+* Score the total number of records per species that share a KG zone with the focal country, and the overall proportions per climate zone       
 * Output a single summary table    
   
 💡The only files that the user needs to change are 1) ``WATCHLIST_INPUT_FILE.txt`` and 2) ``split_gbif.sh`` (namely the file path for the project, and the number of rows to divide the large GBIF file into). If specific changes need to be made to the filtering of the invasive species list before it is processed (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
@@ -96,7 +95,7 @@ Ensure that you are running this R script on a computer that has an uninterrupte
 
 ## 🐝 Input file
 
-Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list csv file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure that the same requirements are met for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything you like - just make sure that the relevant data is available at the path you have specified. 
+Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list CSV file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure that the same requirements are met for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything - as long as the relevant data is available at the specified path. 
 
 ### Template WATCHLIST_INPUT_FILE.txt
 
