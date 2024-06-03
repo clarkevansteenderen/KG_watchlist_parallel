@@ -22,6 +22,10 @@ Makhanda/Grahamstown
 
 -------------------------------------
 
+## 📖 Summary
+
+The WatchListR pipeline is targeted to any country of interest, and uses a global list of invasive species and a list of the target country's endemic species to generate a list of potential invaders that may be of concern. All the available data on the GBIF database for the species in this list of potential invaders are downloaded, and the associated GPS records for each entry are scored as a Köppen-Geiger climate zone. These scored climate zones are subsequently matched to the climate zones present in the target country in order to determine those species with the highest climatic overlap.
+
 ## :spider: Run instructions (Linux environment)
 
 * Download this GitHub repository, and unzip the project folder
