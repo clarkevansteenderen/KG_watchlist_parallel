@@ -32,7 +32,7 @@ library(dplyr)
 ####################################################################
 # Record starting time
 ####################################################################
-start.time = Sys.time()
+start_time = Sys.time()
 ####################################################################
 
 #################################################################
@@ -48,7 +48,7 @@ input.params = dplyr::select(input.params, !parameter)
 
 #################################################################
 
-message("\nREADING IN INVASIVE SPECIES...")
+message("\n✔ READING IN INVASIVE SPECIES...\n")
 
 # extract the relevant information
 griis.full = readr::read_delim(filter(input.params,
@@ -62,7 +62,7 @@ endemics.list.path = dplyr::filter(input.params,
 # if a path is provided, read in the endemics file
 if(endemics.list.path != ""){
   
-  message("\nREADING IN ENDEMIC SPECIES...")
+  message("\n✔ READING IN ENDEMIC SPECIES...\n")
   # change read_delim depending on the format of the file (e.g. CSV)
   endemics.list = readr::read_delim(endemics.list.path)
   
@@ -92,7 +92,7 @@ spp.name.column = filter(input.params,
 ##                  GENERATE SPECIES LIST                  ##
 #################################################################
 
-message(paste0("\nFILTERING BY: \nCountry: ",
+message(paste0("\n✔ FILTERING BY: \nCountry: ",
                target.country, " \nTaxonomic kingdom: ", target.kingdom, 
                "\nRemoving duplicates"))
 
@@ -113,7 +113,7 @@ griis.other = dplyr::filter(griis.full,
   dplyr::distinct(. , accepted_name.species, .keep_all = TRUE) %>%
   dplyr::arrange(., accepted_name.species) # order alphabetically
 
-message(paste0("\nREMOVING SPECIES ALREADY PRESENT IN ",
+message(paste0("\n✔ REMOVING SPECIES ALREADY PRESENT IN ",
                target.country))
 
 # remove any species in the Mauritius list (griis.target) 
@@ -129,7 +129,7 @@ griis.other.filtered = griis.other %>%
 # invasive species not yet in MAU
 if(endemics.list.path != ""){
   
-  message(paste0("\nREMOVING ", target.country, 
+  message(paste0("\n✔ REMOVING ", target.country, 
                  " ENDEMIC SPECIES FROM THE LIST OF INVASIVES..."))
   
   # remove duplicates from the endemics list
@@ -150,7 +150,7 @@ if(endemics.list.path != ""){
 #             Get all synonyms for each input species                #
 ######################################################################
 
-message("\nSEARCHING FOR TAXONOMIC SYNONYMS AND ALTERNATIVE AUTHORITY NAMES...")
+message("\n✔ SEARCHING FOR TAXONOMIC SYNONYMS AND ALTERNATIVE AUTHORITY NAMES...\n")
 
 SYNONYM.LIST = c()
 LOGFILE.LIST = c()
@@ -218,9 +218,10 @@ for(t in 1:nrow(SPECNAMES)){
   
 }#for
 
-message(paste0("\nYOUR SPECIES LIST CONTAINS: \n",
+message(paste0("\nYOUR NEW SPECIES LIST CONTAINS: \n",
                nrow(SYNONYM.LIST), " ENTRIES\n",
-               "YOUR ORIGINAL LIST CONTAINED: ", length(SPECNAMES)))
+               "YOUR ORIGINAL LIST CONTAINED:\n", nrow(SPECNAMES),
+               " ENTRIES\n"))
 
 # SYNONYM.LIST is now the input list to use for the rest of the analysis
 # we can use the speciesKeys straight up now
@@ -251,10 +252,6 @@ if(!is.null(LOGFILE.LIST)){
 end_time = Sys.time()
 #########################################################################
 # Calculate the time taken
+message("TASK STARTED AT: \n", start_time, "\nTASK COMPLETED AT: \n",
+        end_time)
 #########################################################################
-time_taken = round(end_time - start_time, 2)
-#########################################################################
-message(paste0("\nProcessing completed in ", round(time_taken, 2), " minutes"))
-#########################################################################
-
-

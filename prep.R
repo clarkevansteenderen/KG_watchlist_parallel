@@ -57,7 +57,7 @@ gbif.password = filter(input.params,
 ## GENERATE CUSTOMISED INPUT.CSV FILE                                  ##
 #########################################################################
 
-message("\nCREATING INPUT FILE...")
+message("\n✔ CREATING INPUT FILE...\n")
 
 input.file.template = data.frame(matrix(ncol = 6))
 colnames(input.file.template) = c("spp.file.path", 
@@ -104,7 +104,7 @@ if (length(koppengeiger.zones) == 1) {
   INPUT$spp.file.path[1] = "OUTPUTS/FILTERED_SYNONYMS_INC_INPUT_DATA.csv"
   INPUT$gbif.username[1] = gbif.username
   INPUT$gbif.password[1] = gbif.password
-  INPUT$gbif.email[1] = gbif.emailaddress
+  INPUT$gbif.email[1] = gbif.email
   # remove NAs
   INPUT[is.na(INPUT)] = ""
   
@@ -115,4 +115,4 @@ if (length(koppengeiger.zones) == 1) {
 
 ##############################################################################
 
-message("\nPREPARATIONS DONE :)")
+message("\n✔✔ PREPARATIONS DONE ✔✔\n")

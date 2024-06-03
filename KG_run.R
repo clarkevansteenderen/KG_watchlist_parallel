@@ -62,6 +62,7 @@ target.country = filter(input.params,
 #########################################################################
 
 kg_map <- terra::rast("koppen_geiger/Beck_KG_V1_present_0p0083.tif")
+message("\n✔ READ IN KOPPEN-GEIGER SHAPE FILE...\n")
 
 # Set the CRS projection for the current climate layers 
 # - Use the correct wkt CRS format 
@@ -75,6 +76,8 @@ TABLE.LIST = list()
 chunk_files = list.files(path = "OUTPUTS/GBIF_DATA/", pattern = "^chunk_")
 
 start_time = Sys.time()
+
+message("\n✔ STARTING TO READ IN DATA CHUNKS...\n")
 
 for(p in 1:length(chunk_files)){
   
@@ -91,13 +94,13 @@ for(p in 1:length(chunk_files)){
   #                        "countryCode", "decimalLatitude", "decimalLongitude"))
   
   
-  message("\nFILE READ IN SUCCESSFULLY :)")
+  message("\n✔ FILE READ IN SUCCESSFULLY")
   
   ##########################################################################
   # Are any records already known from the target country?
   ##########################################################################
   
-  message("\nCHECKING FOR RECORDS ALREADY IN ", target.country)
+  message("\n✔ CHECKING FOR RECORDS ALREADY IN ", target.country)
   
   # Set aside records from target country/ies for later 
   target_records = CHUNK.DATA %>%
@@ -138,9 +141,13 @@ for(p in 1:length(chunk_files)){
     # Remove records from target country/ies
     dplyr::filter(!country %in% iso.country.code )
   
+  message("\n✔ REMOVING RECORDS WITH MISSING GPS RECORDS...\n")
+  
   # Drop rows with no GPS data -> this can result in columns with NAs.
   df = df %>% 
     tidyr::drop_na(lat, lon)
+  
+  message("\n✔ REMOVING DUPLICATE GPS RECORDS...\n")
   
   # Remove any duplicate GPS points 
   df = df %>%
@@ -150,6 +157,8 @@ for(p in 1:length(chunk_files)){
   # as characters for some odd reason!
   df$lat = as.numeric(df$lat)
   df$lon = as.numeric(df$lon)
+  
+  message("\n✔ EXTRACTING CLIMATE AT GPS LOCALITIES...\n")
   
   # Extract climate at these points 
   kg_extract = terra::extract(
@@ -166,6 +175,8 @@ for(p in 1:length(chunk_files)){
     tidyr::drop_na(kg_zone) %>%
     dplyr::select(-c(ID))
   
+  message("\n✔ CLASSIFYING CLIMATE TYPE AT EACH GPS LOCALITY...\n")
+  
   # Classify if each GPS point lies in a KG zone present 
   # in the target country/ies
   # these are specified in the INPUT.csv file edited by the user
@@ -175,7 +186,9 @@ for(p in 1:length(chunk_files)){
       TRUE ~ 0
     ))
   
-  # Calculate proportion of GPS records within 
+  message("\n✔ TALLYING CLIMATE MATCHES...\n")
+  
+  # Calculate total GPS records within 
   # target country/ies KG zones
   df_results = data_kg %>%
     dplyr::group_by(species) %>%
@@ -216,8 +229,8 @@ for(p in 1:length(chunk_files)){
   
   TABLE.LIST[[p]] = table
   
-  message(paste0("\nCOMPLETED CHUNK ", p, ". OUTPUT TABLE HAS ", nrow(table),
-                 " rows"))
+  message(paste0("\n✔ COMPLETED CHUNK ", p, ". OUTPUT TABLE HAS ", nrow(table),
+                 " rows\n"))
   
 }#for
 
@@ -230,7 +243,7 @@ end_time = Sys.time()
 #########################################################################
 time_taken = round(end_time - start_time, 2)
 #########################################################################
-message(paste0("Processing completed in ", round(time_taken, 2), " minutes"))
+message(paste0("✔ PROCESSING COMPLETED IN ", round(time_taken, 2), " MINUTES\n"))
 #########################################################################
 
 
@@ -240,7 +253,7 @@ message(paste0("Processing completed in ", round(time_taken, 2), " minutes"))
 
 # Combine all the table outputs in the TABLE.LIST here:
 
-message("\nCOMBINING ALL DATA INTO ONE OUTPUT FILE...")
+message("\n✔ COMBINING ALL DATA INTO ONE OUTPUT FILE...\n")
 
 # combine all the output DFs in TABLE.LIST into one DF
 COMBO.DF = dplyr::bind_rows(TABLE.LIST)
@@ -275,22 +288,25 @@ return(dplyr::bind_cols(DF, prop_df))
 # FUNCTION TO GET KG PROPORTIONS 
 ##########################################################
 
+message("\n✔ CALCULATING PROPORTIONS PER KG ZONE...\n")
+
 COMBO.DF = calc_proportions(COMBO.DF)
 
 write.csv(COMBO.DF, "OUTPUTS/GBIF_DATA/WATCHLIST_FULL.csv", row.names = FALSE)
 
-message("\nFULL WATCHLIST OUTPUT FILE WRITTEN")
+message("\n✔ FULL WATCHLIST OUTPUT FILE WRITTEN\n")
 
 ########################################################
 # COLLATE SYNONYMS
 ########################################################
+
+message("\n✔ COLLATING TAXONOMIC SYNONYMS...\n")
 
 # read in the original input list of spp so that we can look for synonyms
 ORIGINAL.INPUT = read.csv("OUTPUTS/FILTERED_SYNONYMS_INC_INPUT_DATA.csv")
 # keep just the important columns
 ORIGINAL.INPUT.selected = dplyr::select(ORIGINAL.INPUT,
                                         c(status, species, original.input.sp))
-
 
 # replace species names with their synonym
 for(p in 1:nrow(COMBO.DF.SYN)){
@@ -311,6 +327,8 @@ COMBO.DF.SYN = COMBO.DF.SYN %>%
   group_by(species) %>%
   summarize(across(everything(), sum))
 
+message("\n✔ CALCULATING PROPORTIONS PER KG ZONE...\n")
+
 COMBO.DF.SYN = calc_proportions(COMBO.DF.SYN)
 
 # do some checks
@@ -321,5 +339,4 @@ COMBO.DF.SYN = calc_proportions(COMBO.DF.SYN)
 write.csv(COMBO.DF.SYN, "OUTPUTS/GBIF_DATA/WATCHLIST_SYN_COLLATED.csv", 
           row.names = FALSE)
 
-message("\nWATCHLIST OUTPUT FILE WITH COLLATED SYNONYMS WRITTEN")
-
+message("\nWATCHLIST OUTPUT FILE WITH COLLATED SYNONYMS WRITTEN\n")

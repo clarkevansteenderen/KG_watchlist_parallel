@@ -79,29 +79,36 @@ species_keys = watchlist_file %>%
 
 if (!dir.exists("OUTPUTS/GBIF_DATA")) {
   dir.create("OUTPUTS/GBIF_DATA")
+  message("\n✔ CREATED FOLDER OUTPUTS/GBIF_DATA...\n")
 }
 
 #########################################################################
 # Record the start time
 #########################################################################
-
 start_time = Sys.time()
-
 #########################################################################
 
-message(paste0("DOWNLOAD STARTED AT ", Sys.time()))
+message(paste0("DOWNLOAD STARTED AT ", start_time, "\n"))
 
 # Download records for the taxon keys
 
+message("\n✔ DOWNLOADING FROM GBIF...\n")
+
 gbif_download = rgbif::occ_download(
+  # exclude any records with geospatial issues
+  rgbif::pred("hasGeospatialIssue", FALSE),
+  # keep only records with available GPS coordinates
+  rgbif::pred("hasCoordinate", TRUE),
+  # remove absent records
+  rgbif::pred("occurrenceStatus","PRESENT"), 
+  # remove fossil and living (zoos and botanical gardens) observations
+  pred_not(pred_in("basisOfRecord",c("FOSSIL_SPECIMEN","LIVING_SPECIMEN"))),
   rgbif::pred_in("speciesKey", species_keys),
   format = "SIMPLE_CSV",
   user = user.input$gbif.username[1],
   pwd = user.input$gbif.password[1],
   email = user.input$gbif.email[1]
 )
-
-message("\nDOWNLOADING FROM GBIF...")
 
 rgbif::occ_download_wait(gbif_download, 
                          quiet = FALSE, 
@@ -117,18 +124,16 @@ end_time = Sys.time()
 #########################################################################
 # Calculate the time taken
 #########################################################################
-time_taken = round(end_time - start_time, 2)
+message("TASK STARTED AT: \n", start_time, "\nTASK COMPLETED AT: \n",
+        end_time)
 #########################################################################
-message(paste0("Processing completed in ", round(time_taken, 2), " minutes"))
-#########################################################################
-
 
 # AT THIS POINT, THE ZIPPED FILE NEEDS TO BE UNZIPPED AND SPLIT TO MAKE IT MANAGEABLE
 # NEEDS TO BE DONE IN LINUX FIRST
 
 ############################# STEPS #################################
 
-############ IN LINUX##############
+############ IN LINUX ##############
 
 # # unzip the gbif download
 # # extract the header columns from the unzipped CSV
@@ -138,5 +143,3 @@ message(paste0("Processing completed in ", round(time_taken, 2), " minutes"))
 ############ IN R ##################
 # 
 # nohup Rscript KG_run.R &> KG_run.out &
-
-
