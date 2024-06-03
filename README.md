@@ -93,7 +93,7 @@ This collection of R scripts follows the pipeline below:
 ``Error occurred while fetching usageKey for species_name : any(content_types == "application/json") is not TRUE ``    
 Ensure that you are running this R script on a computer that has an uninterrupted Internet connection and electricity supply
 
-## 🐝 Input file
+## Input file
 
 Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list CSV file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure that the same requirements are met for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything - as long as the relevant data is available at the specified path. 
 
@@ -150,7 +150,7 @@ In this example, the file ``native_flowering_plants_mau.txt`` contains 695 endem
 **ISO country code options can be found here:**    
 https://www.iso.org/obp/ui/#search 
 
-## 🏜️ Köppen-Geiger zone numbers
+## Köppen-Geiger zone numbers
 
 **KG zone numbers are:**    
 
