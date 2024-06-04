@@ -37,8 +37,7 @@ The ``WatchListR`` pipeline is targeted to any country of interest, and uses a g
 * Run ``nohup Rscript get_synonyms.R &> get_synonyms.out &`` to search for all the available synonyms for each species on GBIF      
 * Run ``Rscript prep.R`` to prepare the required input files for the analysis
 * Run ``nohup Rscript KG_run_setup.R &> KG_run_setup.out &`` to start downloading from GBIF
-* Run ``chmod +x split_gbif.sh`` to make the **split_gbif.sh** shell script executable
-* Run ``./split_gbif.sh`` to run **split_gbif.sh**, which divides the large GBIF zipped folder into multiple small CSV files/chunks that are more manageable (i.e. can be read into R!)
+* Run ``qsub split_gbif.sh`` to run **split_gbif.sh** as a job script on the HPC with allocated wall time (since the large zipped folder can take some time to subset). This script divides the large GBIF zipped folder into multiple small CSV files/chunks that are more manageable (i.e. can be read into R!)
 * Run ``nohup Rscript KG_run.R &> KG_run.out &`` to apply broad-scale climate matching for each smaller file, and collate them all again at the end
 
 ```mermaid
