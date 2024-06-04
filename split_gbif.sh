@@ -1,20 +1,6 @@
 #!/bin/bash
 
 ############################################################################################
-# SET THESE DIRECTORIES ACCORDINGLY
-############################################################################################
-
-# Change the base directory to the appropriate path
-BASE_DIR="/mnt/lustre/users/cvansteenderen/kg_watchlist_V3/OUTPUTS/GBIF_DATA"
-# Automatically detect the name of the zip file in the directory
-ZIP_FILE=$(ls ${BASE_DIR}/*.zip | head -n 1)
-UNZIP_DIR="${BASE_DIR}"
-GBIF_HEADER="${BASE_DIR}/header.csv"
-CHUNK_PREFIX="${BASE_DIR}/chunk_"
-# Change the number of lines here to the appropriate number 
-LINES_PER_FILE=4000000
-
-############################################################################################
 # Look for a zip folder in the specified directory, and if not found, exit the script
 ############################################################################################
 
@@ -24,48 +10,46 @@ if [ -z "$ZIP_FILE" ]; then
 fi
 
 ############################################################################################
-# Unzip the GBIF folder that was downloaded (huge file!)
+# Extract the CSV file name from the zip archive without fully extracting it to disk
 ############################################################################################
 
-echo "Unzipping the downloaded GBIF folder $ZIP_FILE..."
-unzip "$ZIP_FILE" -d "$UNZIP_DIR"
-echo "Unzipping completed."
-
-############################################################################################
-# Look for the unzipped CSV file in the specified directory
-############################################################################################
+# Automatically detect the name of the CSV file inside the zip archive
+INPUT_FILE=$(unzip -l "$ZIP_FILE" | awk '/\.csv$/ {print $4}' | head -n 1)
 
 if [ -z "$INPUT_FILE" ]; then
-  echo "No CSV file found in $BASE_DIR"
+  echo "No CSV file found in the zip archive"
   exit 1
 fi
 
 ############################################################################################
-# Automatically detect the name of the CSV file in the directory
+# Extract the header columns (first row) from the zipped CSV file, and save it as header.csv
 ############################################################################################
 
-INPUT_FILE=$(ls ${BASE_DIR}/*.csv | head -n 1)
-
-############################################################################################
-# Extract the header columns (first row) from the unzipped CSV file, and save it as
-# header.csv 
-############################################################################################
-
-echo "Extracting header from the original file..."
-head -n 1 "$INPUT_FILE" > "$GBIF_HEADER"
+echo "Extracting header from the zipped CSV file..."
+unzip -p "$ZIP_FILE" "$INPUT_FILE" | head -n 1 > "$GBIF_HEADER"
 echo "Header extracted and saved to $GBIF_HEADER."
 
 ############################################################################################
-# Split the original CSV file into chunks of a specified size (number of rows)
+# Debugging: Print LINES_PER_FILE value
 ############################################################################################
 
-echo "Splitting the original GBIF CSV file into chunks..."
-awk -v lines_per_file="$LINES_PER_FILE" -v prefix="$CHUNK_PREFIX" 'NR==1 { next }
-{ file=sprintf("%s%02d.csv", prefix, int((NR-2)/lines_per_file)+1); print > file }' "$INPUT_FILE"
+echo "LINES_PER_FILE is set to: $LINES_PER_FILE"
+
+############################################################################################
+# Split the zipped CSV file into chunks without fully extracting it
+############################################################################################
+
+echo "Splitting the zipped CSV file into chunks..."
+unzip -p "$ZIP_FILE" "$INPUT_FILE" | tail -n +2 | awk -v lines_per_file="$LINES_PER_FILE" -v CHUNK_PREFIX="$CHUNK_PREFIX" '
+{
+    file=sprintf("%s%02d.csv", CHUNK_PREFIX, int((NR-1)/lines_per_file)+1)
+    print > file
+}
+'
 echo "File split into chunks."
 
 ############################################################################################
-# Add the header onto each chunk 
+# Add the header onto each chunk
 ############################################################################################
 
 echo "Appending the header to each chunk file..."
@@ -74,15 +58,6 @@ for file in ${CHUNK_PREFIX}*; do
   cat "$GBIF_HEADER" "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
 done
 echo "Header prepended to each chunk file."
-
-############################################################################################
-# Remove the double header now in the first file
-############################################################################################
-
-echo "Removing the header from the first chunk file..."
-first_file=$(ls ${CHUNK_PREFIX}*.csv | head -n 1)
-sed -i '1d' "$first_file"
-echo "Header removed from $first_file."
 
 echo "HOORAY - script completed successfully!"
 
@@ -101,5 +76,5 @@ rm "$GBIF_HEADER"
 # run this to make the script executable:
 # chmod +x split_gbif.sh
 
-# to run the script:
+# to run the script (this approach doesn't submit it as a qsub job, but rather runs straight from the console):
 # ./split_gbif.sh

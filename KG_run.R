@@ -77,12 +77,12 @@ chunk_files = list.files(path = "OUTPUTS/GBIF_DATA/", pattern = "^chunk_")
 
 start_time = Sys.time()
 
-message("\n✔ STARTING TO READ IN DATA CHUNKS...\n")
+message("\n✔ STARTING TO READ IN DATA CHUNKS...")
 
 for(p in 1:length(chunk_files)){
   
   message(paste0("\nREADING IN GBIF DOWNLOAD CHUNK ", p, " OF ",
-                 length(chunk_files)))
+                 length(chunk_files), "\n"))
   
   CHUNK.DATA = vroom::vroom(paste0("OUTPUTS/GBIF_DATA/", chunk_files[p]),
                             col_select = c("order", "family", "species",
@@ -141,13 +141,13 @@ for(p in 1:length(chunk_files)){
     # Remove records from target country/ies
     dplyr::filter(!country %in% iso.country.code )
   
-  message("\n✔ REMOVING RECORDS WITH MISSING GPS RECORDS...\n")
+  message("\n✔ REMOVING RECORDS WITH MISSING GPS RECORDS...")
   
   # Drop rows with no GPS data -> this can result in columns with NAs.
   df = df %>% 
     tidyr::drop_na(lat, lon)
   
-  message("\n✔ REMOVING DUPLICATE GPS RECORDS...\n")
+  message("\n✔ REMOVING DUPLICATE GPS RECORDS...")
   
   # Remove any duplicate GPS points 
   df = df %>%
@@ -158,7 +158,7 @@ for(p in 1:length(chunk_files)){
   df$lat = as.numeric(df$lat)
   df$lon = as.numeric(df$lon)
   
-  message("\n✔ EXTRACTING CLIMATE AT GPS LOCALITIES...\n")
+  message("\n✔ EXTRACTING CLIMATE AT GPS LOCALITIES...")
   
   # Extract climate at these points 
   kg_extract = terra::extract(
@@ -175,7 +175,7 @@ for(p in 1:length(chunk_files)){
     tidyr::drop_na(kg_zone) %>%
     dplyr::select(-c(ID))
   
-  message("\n✔ CLASSIFYING CLIMATE TYPE AT EACH GPS LOCALITY...\n")
+  message("\n✔ CLASSIFYING CLIMATE TYPE AT EACH GPS LOCALITY...")
   
   # Classify if each GPS point lies in a KG zone present 
   # in the target country/ies
@@ -186,7 +186,7 @@ for(p in 1:length(chunk_files)){
       TRUE ~ 0
     ))
   
-  message("\n✔ TALLYING CLIMATE MATCHES...\n")
+  message("\n✔ TALLYING CLIMATE MATCHES...")
   
   # Calculate total GPS records within 
   # target country/ies KG zones
@@ -230,7 +230,7 @@ for(p in 1:length(chunk_files)){
   TABLE.LIST[[p]] = table
   
   message(paste0("\n✔ COMPLETED CHUNK ", p, ". OUTPUT TABLE HAS ", nrow(table),
-                 " rows\n"))
+                 " rows"))
   
 }#for
 
@@ -243,7 +243,7 @@ end_time = Sys.time()
 #########################################################################
 time_taken = round(end_time - start_time, 2)
 #########################################################################
-message(paste0("✔ PROCESSING COMPLETED IN ", round(time_taken, 2), " MINUTES\n"))
+message(paste0("\n✔ PROCESSING COMPLETED IN ", round(time_taken, 2), " MINUTES"))
 #########################################################################
 
 
@@ -253,7 +253,7 @@ message(paste0("✔ PROCESSING COMPLETED IN ", round(time_taken, 2), " MINUTES\n
 
 # Combine all the table outputs in the TABLE.LIST here:
 
-message("\n✔ COMBINING ALL DATA INTO ONE OUTPUT FILE...\n")
+message("\n✔ COMBINING ALL DATA INTO ONE OUTPUT FILE...")
 
 # combine all the output DFs in TABLE.LIST into one DF
 COMBO.DF = dplyr::bind_rows(TABLE.LIST)
@@ -288,19 +288,19 @@ return(dplyr::bind_cols(DF, prop_df))
 # FUNCTION TO GET KG PROPORTIONS 
 ##########################################################
 
-message("\n✔ CALCULATING PROPORTIONS PER KG ZONE...\n")
+message("\n✔ CALCULATING PROPORTIONS PER KG ZONE...")
 
 COMBO.DF = calc_proportions(COMBO.DF)
 
 write.csv(COMBO.DF, "OUTPUTS/GBIF_DATA/WATCHLIST_FULL.csv", row.names = FALSE)
 
-message("\n✔ FULL WATCHLIST OUTPUT FILE WRITTEN\n")
+message("\n✔ FULL WATCHLIST OUTPUT FILE WRITTEN")
 
 ########################################################
 # COLLATE SYNONYMS
 ########################################################
 
-message("\n✔ COLLATING TAXONOMIC SYNONYMS...\n")
+message("\n✔ COLLATING TAXONOMIC SYNONYMS...")
 
 # read in the original input list of spp so that we can look for synonyms
 ORIGINAL.INPUT = read.csv("OUTPUTS/FILTERED_SYNONYMS_INC_INPUT_DATA.csv")
@@ -327,7 +327,7 @@ COMBO.DF.SYN = COMBO.DF.SYN %>%
   group_by(species) %>%
   summarize(across(everything(), sum))
 
-message("\n✔ CALCULATING PROPORTIONS PER KG ZONE...\n")
+message("\n✔ CALCULATING PROPORTIONS PER KG ZONE...")
 
 COMBO.DF.SYN = calc_proportions(COMBO.DF.SYN)
 
@@ -339,4 +339,4 @@ COMBO.DF.SYN = calc_proportions(COMBO.DF.SYN)
 write.csv(COMBO.DF.SYN, "OUTPUTS/GBIF_DATA/WATCHLIST_SYN_COLLATED.csv", 
           row.names = FALSE)
 
-message("\nWATCHLIST OUTPUT FILE WITH COLLATED SYNONYMS WRITTEN\n")
+message("\nWATCHLIST OUTPUT FILE WITH COLLATED SYNONYMS WRITTEN")

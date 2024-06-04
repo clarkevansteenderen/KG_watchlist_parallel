@@ -1,0 +1,36 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub KG_run.job
+
+# change the file paths as appropriate (-o and -e and cd below)
+############################################################################################
+
+#PBS -l select=2:ncpus=24:mpiprocs=24
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=2:30:00
+#PBS -o /mnt/lustre/users/cvansteenderen/kg_watchlist_test1/stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/kg_watchlist_test1/stderr.txt
+#PBS -N KG_run
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+############################################################################################
+# change the directory here as appropriate for the project
+############################################################################################
+
+cd /mnt/lustre/users/cvansteenderen/kg_watchlist_test1
+
+############################################################################################
+
+module load chpc/BIOMODULES R/4.2.0
+export LANG=en_US.UTF-8 
+export LC_ALL=en_US.UTF-8
+
+############################################################################################
+# CALL THE SCRIPT
+############################################################################################
+
+Rscript KG_run.R

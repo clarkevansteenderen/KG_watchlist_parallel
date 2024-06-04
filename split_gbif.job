@@ -1,0 +1,35 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub split_gbif.job
+############################################################################################
+
+#PBS -l select=2:ncpus=24:mpiprocs=24
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=2:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/kg_watchlist_test1/OUTPUTS/GBIF_DATA/stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/kg_watchlist_test1/OUTPUTS/GBIF_DATA/stderr.txt
+#PBS -N unzip_and_chunk
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+############################################################################################
+# SET THESE DIRECTORIES ACCORDINGLY
+############################################################################################
+
+# Change the base directory to the appropriate path
+BASE_DIR="/mnt/lustre/users/cvansteenderen/kg_watchlist_test1/OUTPUTS/GBIF_DATA"
+# Automatically detect the name of the zip file in the directory
+ZIP_FILE=$(ls ${BASE_DIR}/*.zip | head -n 1)
+GBIF_HEADER="${BASE_DIR}/header.csv"
+CHUNK_PREFIX="${BASE_DIR}/chunk_"
+# Change the number of lines here to the appropriate number
+LINES_PER_FILE=2000000
+
+############################################################################################
+# CALL THE SCRIPT
+############################################################################################
+
+split_gbif.sh
