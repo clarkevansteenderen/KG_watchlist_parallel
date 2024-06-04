@@ -37,8 +37,9 @@ The ``WatchListR`` pipeline is targeted to any country of interest, and uses a g
 * Run ``nohup Rscript get_synonyms.R &> get_synonyms.out &`` to search for all the available synonyms for each species on GBIF      
 * Run ``Rscript prep.R`` to prepare the required input files for the analysis
 * Run ``nohup Rscript KG_run_setup.R &> KG_run_setup.out &`` to start downloading from GBIF
-* Run ``qsub split_gbif.sh`` to run **split_gbif.sh** as a job script on the HPC with allocated wall time (since the large zipped folder can take some time to subset). This script divides the large GBIF zipped folder into multiple small CSV files/chunks that are more manageable (i.e. can be read into R!)
-* Run ``nohup Rscript KG_run.R &> KG_run.out &`` to apply broad-scale climate matching for each smaller file, and collate them all again at the end
+* ssh to ``cvansteenderen@lengau.chpc.ac.za ``           
+* Run ``qsub split_gbif.job`` to run **split_gbif.sh** as a job script on the HPC with allocated wall time (since the large zipped folder can take some time to subset). This script divides the large GBIF zipped folder into multiple small CSV files/chunks that are more manageable (i.e. can be read into R!)
+* Run ``qsub KG_run.job`` to run **KG_run.R** to apply broad-scale climate matching for each smaller file, and collate them all again at the end
 
 ```mermaid
   graph LR;
@@ -51,7 +52,7 @@ The ``WatchListR`` pipeline is targeted to any country of interest, and uses a g
       I--o J[(WATCHLIST_OUTPUT.csv)]
 ```
 
-An example of the console input could be:      
+An example of the console input on the globus node (for Internet access) could be:      
 
 ```
 ssh cvansteenderen@globus.chpc.ac.za
@@ -62,12 +63,18 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 nohup Rscript get_synonyms.R &> get_synonyms.out &
 Rscript prep.R       
-nohup Rscript KG_run_setup.R &> KG_run_setup.out &      
-qsub split_gbif.sh          
-nohup Rscript KG_run.R &> KG_run.out &      
+nohup Rscript KG_run_setup.R &> KG_run_setup.out &         
 ```
-
 💡The nohup part of the code means "no hangup", and allows the user to run additional tasks while the previous task is running, and/or keeps the code running even if the user logs off the HPC
+
+Followed by the last two scripts on the normal HPC node:
+
+```
+ssh cvansteenderen@lengau.chpc.ac.za      
+Cryophytum2024@!      
+qsub split_gbif.job              
+qsub KG_run.job    
+```
 
 ## Workflow
 
