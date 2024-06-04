@@ -136,9 +136,9 @@ Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file 
 ``SPECIES NAME COLUMN``	accepted_name.species    
 ``ENDEMICS NAME COLUMN``	full.tax.name    
 ``KOPPEN-GEIGER ZONES``	1, 2, 3, 14    
-``GBIF USERNAME``	clarke.vansteenderen    
-``GBIF EMAIL``	vsteenderen@gmail.com    
-``GBIF PASSWORD``	roxie2@! 		      
+``GBIF USERNAME``	gbifuser123    
+``GBIF EMAIL``	johndoe@gmail.com    
+``GBIF PASSWORD``	*** 		      
 
 ## 🐛 SPECIES LIST PATH -> the list of invasive species of interest
 
