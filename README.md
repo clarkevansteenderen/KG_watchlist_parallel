@@ -99,6 +99,7 @@ This collection of R scripts follows the pipeline below:
 
 If specific changes need to be made to the filtering of the invasive species list before it is processed (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
 
+<br />
 <img src="workflow.png" width="850" height="450">
 
 ## Troubleshooting
