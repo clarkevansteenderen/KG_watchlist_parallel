@@ -63,8 +63,7 @@ export LC_ALL=en_US.UTF-8
 nohup Rscript get_synonyms.R &> get_synonyms.out &
 Rscript prep.R       
 nohup Rscript KG_run_setup.R &> KG_run_setup.out &      
-chmod +x split_gbif.sh      
-./split_gbif.sh      
+qsub split_gbif.sh          
 nohup Rscript KG_run.R &> KG_run.out &      
 ```
 
