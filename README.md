@@ -77,6 +77,11 @@ qsub split_gbif.job
 qsub KG_run.job    
 ```
 
+💡To check the status of a qsub job, type:      
+``qstat jobID``     
+To cancel a job, type:    
+``qdel jobID``     
+
 ## Workflow
 
 This collection of R scripts follows the pipeline below:
