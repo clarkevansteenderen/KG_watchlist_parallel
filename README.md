@@ -91,7 +91,13 @@ This collection of R scripts follows the pipeline below:
 * Score the total number of records per species that share a KG zone with the focal country, and the overall proportions per climate zone       
 * Output a single summary table    
   
-💡The only files that the user needs to change are 1) ``WATCHLIST_INPUT_FILE.txt`` and 2) ``split_gbif.sh`` (namely the file path for the project, and the number of rows to divide the large GBIF file into). If specific changes need to be made to the filtering of the invasive species list before it is processed (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
+💡The only files that the user needs to change are:    
+
+1) ``WATCHLIST_INPUT_FILE.txt`` - change the project parameters (e.g. country name, KG zones)      
+2) ``split_gbif.job`` - change the file path for the project, and the number of rows to divide the large GBIF file into (defaults to 2 million)        
+3) ``KG_run.job``  - change the file path for the project         
+
+If specific changes need to be made to the filtering of the invasive species list before it is processed (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
 
 ## Troubleshooting
 
