@@ -86,7 +86,7 @@ To cancel a job, type:
 
 This collection of R scripts follows the pipeline below:
 
-* Input a CSV file containing a list of the genus and species names of invasive organisms of interest (e.g. from the Global Register of Introduced and Invasive Species [GRIIS](https://griis.org/) database)    
+* Input a CSV file containing a list of the genus and species names of invasive organisms of interest (e.g. from the Global Register of Introduced and Invasive Species [GRIIS](https://griis.org/) database. The list can be downloaded [here](https://zenodo.org/records/6348164)    
 * Input the name of a country that is under potential threat from these species (focal country)     
 * Remove (1) all taxa already recorded in the focal country, and (2) endemic species (if available) from the list       
 * Input a list of the Köppen-Geiger zones present in the focal country      
