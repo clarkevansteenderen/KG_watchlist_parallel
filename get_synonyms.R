@@ -55,6 +55,8 @@ griis.full = readr::read_delim(filter(input.params,
                                       row.names(input.params) %in% 
                                         c("SPECIES LIST PATH"))$choice)
 
+# griis.plantae = griis.full %>% dplyr::filter(accepted_name.kingdom == "Plantae")
+ 
 endemics.list.path = dplyr::filter(input.params,
                                    row.names(input.params) %in% 
                                      c("ENDEMICS LIST PATH"))$choice
@@ -96,22 +98,36 @@ message(paste0("\n✔ FILTERING BY: \nCountry: ",
                target.country, " \nTaxonomic kingdom: ", target.kingdom, 
                "\nRemoving duplicates"))
 
+griis.invasive.orgs = griis.full %>% 
+    dplyr::filter(accepted_name.kingdom == target.kingdom, 
+                  is_invasive == "invasive") 
+
+message(paste0("\n✔ THERE ARE ", nrow(griis.invasive.orgs), 
+               " INVASIVE ", target.kingdom))
+
 # Extract all the Mauritius records for Plantae that are invasive
 griis.target = dplyr::filter(griis.full, 
                              checklist.name == target.country,
                              accepted_name.kingdom == target.kingdom,
-                             #is_invasive == "invasive"
+                             is_invasive == "invasive"
 ) %>%
   dplyr::distinct(., accepted_name.species, .keep_all = TRUE) %>%
   dplyr::arrange(., accepted_name.species) # order alphabetically
+
+message(paste0("\n✔ FOUND ", nrow(griis.target), 
+               " INVASIVE SPECIES RECORDS IN ", target.country))
 
 # Extract everything other than Mauritius records for Plantae that are invasive
 griis.other = dplyr::filter(griis.full, 
                             checklist.name != target.country,
                             accepted_name.kingdom == target.kingdom,
-                            is_invasive == "invasive") %>%
+                            is_invasive == "invasive"
+                            ) %>%
   dplyr::distinct(. , accepted_name.species, .keep_all = TRUE) %>%
   dplyr::arrange(., accepted_name.species) # order alphabetically
+
+message(paste0("\n✔ FOUND ", nrow(griis.other), 
+               " INVASIVE SPECIES RECORDS THAT EXCLUDE ", target.country))
 
 message(paste0("\n✔ REMOVING SPECIES ALREADY PRESENT IN ",
                target.country))
@@ -120,6 +136,10 @@ message(paste0("\n✔ REMOVING SPECIES ALREADY PRESENT IN ",
 # FROM the "griis.other" list
 griis.other.filtered = griis.other %>%
   dplyr::filter(! accepted_name.species %in% griis.target$accepted_name.species)
+
+message(paste0("\n✔ THERE ARE NOW ", nrow(griis.other.filtered) , 
+               " INVASIVE SPECIES RECORDS THAT EXCLUDE TAXA THAT HAVE BEEN RECORDED IN ", 
+               target.country))
 
 # Only bother with this if there is a list of endemics available
 # read in a list of native flowering plants in Mauritius, 
@@ -136,13 +156,27 @@ if(endemics.list.path != ""){
   endemics.list = endemics.list %>%
     dplyr::distinct(. , endemics.list[[endemics.spp.name.col]], .keep_all = TRUE)
   
+  message(paste0("\n✔ THERE ARE ", nrow(endemics.list), " ENDEMICS IN THE LIST PROVIDED"))
+  
   # store the native species that were in the griis list (and now removed)
   endemics_in_griis_list = griis.other.filtered %>%
     dplyr::filter(accepted_name.species %in% endemics.list[[endemics.spp.name.col]])
   
+  if(nrow(endemics_in_griis_list) > 0){
+  message(paste0("\n✔ ", nrow(endemics_in_griis_list), 
+                 " ENDEMIC SPECIES WERE REMOVED FROM THE INVASIVES LIST"))
+  }#if
+  
+  if(nrow(endemics_in_griis_list) == 0){
+    message("\n✔ THERE WERE NO ENDEMICS IN THE LIST OF INVASIVES")
+  }# else if
+  
   # remove species in the endemics list FROM the "griis.other.filtered" list
   griis.other.filtered = griis.other.filtered %>%
     dplyr::filter(! accepted_name.species %in% endemics.list[[endemics.spp.name.col]])
+  
+  message(paste0("\n✔ THERE ARE NOW ", nrow(griis.other.filtered), 
+                 " SPECIES IN THE INVASIVE LIST THAT WILL BE USED IN THE NEXT STEP"))
   
 }# if
 
@@ -252,6 +286,7 @@ if(!is.null(LOGFILE.LIST)){
 end_time = Sys.time()
 #########################################################################
 # Calculate the time taken
-message("TASK STARTED AT: \n", start_time, "\nTASK COMPLETED AT: \n",
+message("\nTASK STARTED AT: \n", start_time, "\nTASK COMPLETED AT: \n",
         end_time)
 #########################################################################
+

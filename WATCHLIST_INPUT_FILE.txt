@@ -4,7 +4,7 @@
 # If no endemic species list is available, leave the ENDEMICS LIST PATH and ENDEMICS NAME COLUMN blank	
 
 SPECIES LIST PATH	griis_data/griis_full_database.csv
-ENDEMICS LIST PATH	mau_endemics/native_flowering_plants_mau.txt
+ENDEMICS LIST PATH	endemics/native_flowering_plants_mau.txt
 TARGET COUNTRY	Mauritius
 KINGDOM	Plantae
 ISO COUNTRY CODE	MU
