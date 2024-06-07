@@ -98,9 +98,18 @@ This collection of R scripts follows the pipeline below:
   
 💡The only files that the user needs to change are:    
 
-1) ``WATCHLIST_INPUT_FILE.txt`` - change the project parameters (e.g. country name, KG zones)      
-2) ``split_gbif.job`` - change the file path for the project, and the number of rows to divide the large GBIF file into (defaults to 2 million)        
-3) ``KG_run.job``  - change the file path for the project         
+1) ``WATCHLIST_INPUT_FILE.txt`` - change the project parameters (e.g. country name, KG zones)
+2) ``split_gbif.job`` - change the file path for the project, the country name, and the number of rows to divide the large GBIF file into (defaults to 2 million -> should be fine, usually produces 1GB files), namely the lines:
+    *   #PBS -o /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRYNAME**/OUTPUTS/GBIF_DATA/stdout.txt
+    *   #PBS -e /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRYNAME**/OUTPUTS/GBIF_DATA/stderr.txt
+    *   #PBS -N unzip_and_chunk_**COUNTRYNAME**
+    *   BASE_DIR="/mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRYNAME**/OUTPUTS/GBIF_DATA"
+    *   LINES_PER_FILE=**2000000**
+4) ``KG_run.job``  - change the file path for the project and the country name, namely the lines:
+    *   #PBS -o /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRY**/stdout.txt
+    *   #PBS -e /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRY**/stderr.txt
+    *   #PBS -N KG_run_**COUNTRY**
+    *   cd /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRY**
 
 If specific changes need to be made to the filtering of the invasive species list before it is processed (e.g. more than one taxonomic kingdom, such as Plantae AND Animalia), then edits can be made in the ``get_synonyms.R`` file.
 
