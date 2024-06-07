@@ -38,7 +38,7 @@ The ``WatchListR`` pipeline is targeted to any country of interest, and uses a g
 * Run ``Rscript prep.R`` to prepare the required input files for the analysis
 * Run ``nohup Rscript KG_run_setup.R &> KG_run_setup.out &`` to start downloading from GBIF
 * ssh to ``cvansteenderen@lengau.chpc.ac.za ``           
-* Run ``qsub split_gbif.job`` to run **split_gbif.sh** as a job script on the HPC with allocated wall time (since the large zipped folder can take some time to subset). This script divides the large GBIF zipped folder into multiple small CSV files/chunks that are more manageable (i.e. can be read into R!)
+* Run ``qsub split_gbif.job`` to divide the large GBIF zipped folder into multiple small CSV files/chunks that are more manageable (i.e. can be read into R!)
 * Run ``qsub KG_run.job`` to run **KG_run.R** to apply broad-scale climate matching for each smaller file, and collate them all again at the end
 
 ```mermaid
@@ -47,8 +47,8 @@ The ``WatchListR`` pipeline is targeted to any country of interest, and uses a g
       A -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt] & D>invasive species list] & E>endemic species list] 
       B -..- |READS IN| F>GBIF accounts details]
       B --> G[3. KG_run_setup.R]
-      G --> H[4. split_gbif.sh]
-      H --> I[5. KG_run.R]
+      G --> H[4. split_gbif.job]
+      H --> I[5. KG_run.job]
       I--o J[(WATCHLIST_OUTPUT.csv)]
 ```
 
