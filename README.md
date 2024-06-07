@@ -82,6 +82,8 @@ qsub KG_run.job
 To cancel a job, type:    
 ``qdel jobID``     
 
+💡 ``ssh -o "ServerAliveInterval 60" cvansteenderen@globus.chpc.ac.za`` will prevent the ssh console from timing out
+
 ## Workflow
 
 This collection of R scripts follows the pipeline below:
