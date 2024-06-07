@@ -106,8 +106,8 @@ This collection of R scripts follows the pipeline below:
     *   BASE_DIR="/mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRYNAME**/OUTPUTS/GBIF_DATA"
     *   LINES_PER_FILE=**2000000**
 4) ``KG_run.job``  - change the file path for the project and the country name, namely the lines:
-    *   #PBS -o /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRY**/stdout.txt
-    *   #PBS -e /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRY**/stderr.txt
+    *   #PBS -o /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRY**/KG_run_stdout.txt
+    *   #PBS -e /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRY**/KG_run_stderr.txt
     *   #PBS -N KG_run_**COUNTRY**
     *   cd /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_**COUNTRY**
 
