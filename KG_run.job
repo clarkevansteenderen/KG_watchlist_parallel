@@ -11,8 +11,8 @@
 #PBS -P CBBI1682
 #PBS -q normal
 #PBS -l walltime=2:30:00
-#PBS -o /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_COUNTRY/stdout.txt
-#PBS -e /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_COUNTRY/stderr.txt
+#PBS -o /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_COUNTRY/KG_run_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/KG_WATCHLIST_COUNTRY/KG_run_stderr.txt
 #PBS -N KG_run_COUNTRY
 #PBS -M vsteenderen@gmail.com
 #PBS -m abe
