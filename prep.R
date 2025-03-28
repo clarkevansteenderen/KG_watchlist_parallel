@@ -35,11 +35,22 @@ iso.country.code = filter(input.params,
                           row.names(input.params) %in% 
                             c("ISO COUNTRY CODE"))$choice
 
-koppengeiger.zones = filter(input.params,
-                            row.names(input.params) %in% 
-                              c("KOPPEN-GEIGER ZONES"))$choice 
+country.name = filter(input.params,
+                          row.names(input.params) %in% 
+                            c("TARGET COUNTRY"))$choice
 
-koppengeiger.zones = as.numeric(unlist(strsplit(koppengeiger.zones, ",\\s*")))
+# koppengeiger.zones = filter(input.params,
+#                             row.names(input.params) %in% 
+#                               c("KOPPEN-GEIGER ZONES"))$choice 
+# 
+# koppengeiger.zones = as.numeric(unlist(strsplit(koppengeiger.zones, ",\\s*")))
+
+# high risk (HR) countries of interest (e.g. trading partners)
+HR.iso.country.code = filter(input.params,
+                            row.names(input.params) %in% 
+                              c("HIGH RISK COUNTRY/IES"))$choice 
+
+HR.iso.country.code = unlist(strsplit(HR.iso.country.code, ",\\s*"))
 
 gbif.username = filter(input.params,
                        row.names(input.params) %in% 
@@ -54,21 +65,52 @@ gbif.password = filter(input.params,
                          c("GBIF PASSWORD"))$choice
 
 #########################################################################
+## GET THE KOPPEN GEIGER MAP, AND EXTRACT CLIMTATE TYPES FOR THE TARGET
+## COUNTRY
+#########################################################################
+
+kg_map <- terra::rast("koppen_geiger/Beck_KG_V1_present_0p0083.tif")
+message("\n✔ READ IN KOPPEN-GEIGER SHAPE FILE...\n")
+
+# Set the CRS projection for the current climate layers 
+# - Use the correct wkt CRS format 
+terra::crs(kg_map) = "epsg:4326"
+terra::crs(kg_map, describe = T)
+
+country = rnaturalearth::ne_countries(scale = "medium", country = country.name, returnclass = "sf")
+kg_country = terra::crop(kg_map, country)   # Crop to country extent
+kg_country = terra::mask(kg_country, country)  # Mask outside areas
+#terra::plot(kg_country, legend = TRUE)
+climate_types = unique(terra::values(kg_country), na.rm = TRUE)
+
+koppengeiger.zones = as.numeric(climate_types) %>%
+  na.omit() %>% # remove NA
+  .[. != 0] %>% # remove 0
+  sort() # sort in ascending order
+
+message(paste0("\n✔ KOPPEN-GEIGER CLIMATE ZONES FOR ", country.name, " ARE: ", 
+               paste(koppengeiger.zones, collapse = ", ")))
+
+
+#########################################################################
 ## GENERATE CUSTOMISED INPUT.CSV FILE                                  ##
 #########################################################################
 
 message("\n✔ CREATING INPUT FILE...\n")
 
-input.file.template = data.frame(matrix(ncol = 6))
+input.file.template = data.frame(matrix(ncol = 7))
 colnames(input.file.template) = c("spp.file.path", 
                                   "gbif.username", "gbif.password", "gbif.email",
-                                  "iso.country.code", "koppengeiger.zone.numbers")
+                                  "iso.country.code", "HR.iso.country.code",
+                                  "koppengeiger.zone.numbers")
 
 ##############################################################################
 
+
 # Determine the number of rows needed based on the longest vector ->
 # country codes or koppen zones could have multiple entries
-num_rows = max(length(iso.country.code), length(koppengeiger.zones))
+num_rows = max(length(iso.country.code), length(koppengeiger.zones),
+               length(HR.iso.country.code))
 
 # dynamically set the number of rows to the number of koppengeiger zones
 input.file.template = input.file.template[rep(1, num_rows), ]
@@ -88,7 +130,13 @@ if (length(iso.country.code) == 1) {
 if (length(koppengeiger.zones) == 1) {
   input.file.template$koppengeiger.zone.numbers[1] = koppengeiger.zones
 } else {
-  input.file.template$koppengeiger.zone.numbers = koppengeiger.zones
+  input.file.template$koppengeiger.zone.numbers[1:length(koppengeiger.zones)] = koppengeiger.zones
+}
+
+if (length(HR.iso.country.code) == 1) {
+  input.file.template$HR.iso.country.code[1] = HR.iso.country.code
+} else {
+  input.file.template$HR.iso.country.code[1:length(HR.iso.country.code)] = HR.iso.country.code
 }
 
 ##############################################################################
@@ -108,7 +156,7 @@ if (length(koppengeiger.zones) == 1) {
   # remove NAs
   INPUT[is.na(INPUT)] = ""
   
-  # write the INPUT file to each RUN folder
+  # write the INPUT file
   write.csv(INPUT, 
             paste0("OUTPUTS/PARAMETERS.csv"),
             row.names = FALSE)
