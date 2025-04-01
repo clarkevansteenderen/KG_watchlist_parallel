@@ -1,0 +1,12 @@
+name: watchlistR
+title: watchlistR
+username: clarkevansteenderen
+account: clarkevansteenderen
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14387681
+bundleId: 10037517
+url: https://clarkevansteenderen.shinyapps.io/watchlistR/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
