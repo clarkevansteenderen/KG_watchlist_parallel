@@ -43,13 +43,29 @@ The ``WatchListR`` pipeline is targeted to any country of interest, and uses a g
 
 ```mermaid
   graph LR;
-      A[get_synonyms.R] --> B[prep.R]
-      A -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt] & D>invasive species list GRIIS] & E>species to exclude list] 
-      B -..- |READS IN| F>GBIF accounts details]
-      B --> G[KG_run_setup.R]
-      G --> H[split_gbif.job]
-      H --> I[KG_run.job]
-      I--o J[(WATCHLIST_OUTPUT.csv)]
+      A[get_synonyms.R] --> |1| B[prep.R]
+      A -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt]
+      C -..- |FETCHES| D>invasive species list GRIIS] & E>species to exclude list]
+      B -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt]
+      C -..- |FETCHES| K>climate zones] & L>GBIF account details] & M>country codes]
+      B --> |2| G[KG_run_setup.R]
+      G --> |3| H[split_gbif.job]
+      H --> |4| I[KG_run.job]
+      I--o |5| J[(WATCHLIST_OUTPUT.csv)]
+
+%% Custom styling
+    style A fill:#FFDDC1,stroke:#FF5733,stroke-width:2px
+    style B fill:#C1E1FF,stroke:#0073E6,stroke-width:2px
+    style C fill:#E6C1FF,stroke:#8000E6,stroke-width:2px
+    style D fill:#C1FFC1,stroke:#00A600,stroke-width:2px
+    style E fill:#C1FFC1,stroke:#00A600,stroke-width:2px
+    style G fill:#FFD700,stroke:#B8860B,stroke-width:2px
+    style H fill:#FFA07A,stroke:#E74C3C,stroke-width:2px
+    style I fill:#98FB98,stroke:#228B22,stroke-width:2px
+    style J fill:#ADD8E6,stroke:#4682B4,stroke-width:2px
+    style K fill:#D3D3D3,stroke:#696969,stroke-width:2px
+    style L fill:#D3D3D3,stroke:#696969,stroke-width:2px
+    style M fill:#D3D3D3,stroke:#696969,stroke-width:2px
 ```
 
 An example of the console input on the globus node (for Internet access) could be:      
