@@ -44,7 +44,7 @@ The ``WatchListR`` pipeline is targeted to any country of interest, and uses a g
 ```mermaid
   graph LR;
       A[get_synonyms.R] --> B[prep.R]
-      A -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt] & D>invasive species list] & E>endemic species list] 
+      A -..- |READS IN| C>WATCHLIST_INPUT_FILE.txt] & D>invasive species list GRIIS] & E>species to exclude list] 
       B -..- |READS IN| F>GBIF accounts details]
       B --> G[KG_run_setup.R]
       G --> H[split_gbif.job]
