@@ -1,0 +1,210 @@
+<eml:eml xmlns:eml="eml://ecoinformatics.org/eml-2.1.1"
+         xmlns:dc="http://purl.org/dc/terms/"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 http://rs.gbif.org/schema/eml-gbif-profile/1.1/eml.xsd"
+         packageId="649fb99c-5bb1-4a3b-83df-7f9b3fe4dca6/v1.1" system="http://gbif.org" scope="system"
+         xml:lang="eng">
+
+<dataset>
+  <alternateIdentifier>649fb99c-5bb1-4a3b-83df-7f9b3fe4dca6</alternateIdentifier>
+  <alternateIdentifier>https://cloud.gbif.org/bid/resource?r=checklist_mau</alternateIdentifier>
+  <title xml:lang="eng">Checklist of flowering plants of the island of Mauritius, Indian Ocean</title>
+      <creator>
+    <individualName>
+        <givenName>Claudia</givenName>
+      <surName>Baider</surName>
+    </individualName>
+    <organizationName>The Mauritius Herbarium</organizationName>
+    <positionName>Curator</positionName>
+    <address>
+        <deliveryPoint>RE Vaughan Building, MSIRI compound</deliveryPoint>
+        <city>Reduit</city>
+        <postalCode>80835</postalCode>
+        <country>MU</country>
+    </address>
+    <phone>(+230) 4541061</phone>
+    <electronicMailAddress>mauritiusherbarium@gmail.com</electronicMailAddress>
+    <onlineUrl>http://agriculture.govmu.org/English/Pages/Agronomy/The-Mauritius-Herbarium.aspx</onlineUrl>
+          <userId directory="http://scholar.google.com/citations?user=">0000-0002-2203-2076</userId>
+      </creator>
+      <metadataProvider>
+    <individualName>
+        <givenName>Claudia</givenName>
+      <surName>Baider</surName>
+    </individualName>
+    <organizationName>The Mauritius Herbarium</organizationName>
+    <positionName>Curator</positionName>
+    <address>
+        <deliveryPoint>RE Vaughan Building, MSIRI compound</deliveryPoint>
+        <city>Reduit</city>
+        <postalCode>80835</postalCode>
+        <country>MU</country>
+    </address>
+    <phone>(+230) 4541061</phone>
+    <electronicMailAddress>mauritiusherbarium@gmail.com</electronicMailAddress>
+    <onlineUrl>http://agriculture.govmu.org/English/Pages/Agronomy/The-Mauritius-Herbarium.aspx</onlineUrl>
+          <userId directory="http://scholar.google.com/citations?user=">0000-0002-2203-2076</userId>
+      </metadataProvider>
+      <associatedParty>
+    <individualName>
+        <givenName>Claudia</givenName>
+      <surName>Baider</surName>
+    </individualName>
+    <organizationName>The Mauritius Herbarium</organizationName>
+    <positionName>Curator</positionName>
+    <address>
+        <deliveryPoint>RE Vaughan Building, MSIRI compound</deliveryPoint>
+        <city>Reduit</city>
+        <postalCode>80835</postalCode>
+        <country>MU</country>
+    </address>
+    <phone>(+230) 4541061</phone>
+    <electronicMailAddress>mauritiusherbarium@gmail.com</electronicMailAddress>
+    <onlineUrl>http://agriculture.govmu.org/English/Pages/Agronomy/The-Mauritius-Herbarium.aspx</onlineUrl>
+          <userId directory="http://scholar.google.com/citations?user=">0000-0002-2203-2076</userId>
+    <role>user</role>
+      </associatedParty>
+  <pubDate>
+      2019-01-28
+  </pubDate>
+  <language>eng</language>
+  <abstract>
+    <para>This dataset is the checklist of the native flowering species of the island of Mauritius, Indian Ocean. This checklist is prepared by The Mauritius Herbarium, using information from the ‘Flore des Mascareignes’and newer published literature. It lists the valid name of recognised native flowering species following APG IV (2016). It includes possible native species - those species that include Mauritius in their range of distribution and are known not to have been introduced. Next versions are going to include vernacular names, known synonyms used in the Mascarenes and origin (endemic, native, probably native), and source (publication citation).
+
+This first version of this checklist is a step towards a comprehensive updated and curated list of the native flowering plants species of the island of Mauritius. The most recent flora of Mauritius is being published under the collaboration of Mauritius, France and the UK, under series ‘Flore des Mascareignes”. The first volume of the series was published in 1976, with three volumes in preparation (Poaceae and Cyperaceae that are expected soon, and Orchidaceae). 
+
+It is expected that an update and curated list will support the scientific community, the Mauritius Government and also the general public. Mauritius has one of the most threatened flora in the world, therefore good quality information is essential to decision makers and conservationist.
+
+This databasing effort has been funded by BID Africa Call 2017, grant BID-AF2017-SMA_0316 (https://www.gbif.org/project/aRCxBBF1BYU2C0us62ea4/getting-the-plants-to-all-dissemination-of-information-from-the-collection-of-the-mauritius-herbarium.)</para>
+  </abstract>
+      <keywordSet>
+            <keyword>Checklist</keyword>
+            <keyword>Angiosperms</keyword>
+            <keyword>Magnoliophyta</keyword>
+            <keyword>Basal angiosperms</keyword>
+            <keyword>Core angiosperms</keyword>
+            <keyword>Mauritius</keyword>
+        <keywordThesaurus>GBIF Dataset Type Vocabulary: http://rs.gbif.org/vocabulary/gbif/dataset_type.xml</keywordThesaurus>
+      </keywordSet>
+  <additionalInfo>
+    <para>Next versions are going to include vernacular names, known synonyms used in the Mascarenes and origin (endemic, native, probably native), and source (publication citation).</para>
+  </additionalInfo>
+  <intellectualRights>
+    <para>This work is licensed under a <ulink url="http://creativecommons.org/licenses/by/4.0/legalcode"><citetitle>Creative Commons Attribution (CC-BY) 4.0 License</citetitle></ulink>.</para>
+  </intellectualRights>
+  <coverage>
+      <geographicCoverage>
+          <geographicDescription>Mauritius mainland and islets around</geographicDescription>
+        <boundingCoordinates>
+          <westBoundingCoordinate>57.301</westBoundingCoordinate>
+          <eastBoundingCoordinate>57.814</eastBoundingCoordinate>
+          <northBoundingCoordinate>-19.811</northBoundingCoordinate>
+          <southBoundingCoordinate>-20.531</southBoundingCoordinate>
+        </boundingCoordinates>
+      </geographicCoverage>
+          <temporalCoverage>
+              <rangeOfDates>
+                  <beginDate>
+                    <calendarDate>1753</calendarDate>
+                  </beginDate>
+                <endDate>
+                  <calendarDate>2018</calendarDate>
+                </endDate>
+              </rangeOfDates>
+          </temporalCoverage>
+  </coverage>
+  <maintenance>
+    <description>
+      <para></para>
+    </description>
+    <maintenanceUpdateFrequency>asNeeded</maintenanceUpdateFrequency>
+  </maintenance>
+
+      <contact>
+    <individualName>
+        <givenName>Claudia</givenName>
+      <surName>Baider</surName>
+    </individualName>
+    <organizationName>The Mauritius Herbarium</organizationName>
+    <positionName>Curator</positionName>
+    <address>
+        <deliveryPoint>RE Vaughan Building, MSIRI compound</deliveryPoint>
+        <city>Reduit</city>
+        <postalCode>80835</postalCode>
+        <country>MU</country>
+    </address>
+    <phone>(+230) 4541061</phone>
+    <electronicMailAddress>mauritiusherbarium@gmail.com</electronicMailAddress>
+    <onlineUrl>http://agriculture.govmu.org/English/Pages/Agronomy/The-Mauritius-Herbarium.aspx</onlineUrl>
+          <userId directory="http://scholar.google.com/citations?user=">0000-0002-2203-2076</userId>
+      </contact>
+  <methods>
+        <methodStep>
+          <description>
+            <para>After selecting a native species using literature cited above, its name and authority is stored in BRAHMS. Taxon name and authority are than validated using multiple online resources as specified above.</para>
+          </description>
+        </methodStep>
+      <sampling>
+        <studyExtent>
+          <description>
+            <para>Recorded native flowering plants of the island of Mauritius</para>
+          </description>
+        </studyExtent>
+        <samplingDescription>
+          <para>Information for include a species as native is sampled manually from the Flore des Mascareignes (Bosser et al 1976-onwards) and newer publications. Other sources as previous floras of Mauritius (Bojer 1837 and Baker 1877), unpublished monographs (e.g. Cyperaceae by RE Vaughan 1932), monographs and other scientific literature are also used. The database is constructed in BRAHMS v7.</para>
+        </samplingDescription>
+      </sampling>
+      <qualityControl>
+        <description>
+          <para>Taxon name and authority derived from the Flore des Mascareignes (Bosser et al 1976-onwards) were validated against Tropicos (http://www.tropicos.org), IPNI (http://www.ipni.org), GBIF (http://www.gbif.org/), WCSP (http://wcsp.science.kew.org/) or recent scientific publications. </para>
+        </description>
+      </qualityControl>
+  </methods>
+  <project id="BID-AF2017-0316-SMA">
+    <title>Checklist of flowering plants of the Republic of Mauritius</title>
+      <personnel>
+        <individualName>
+            <givenName>Claudia</givenName>
+          <surName>Baider</surName>
+        </individualName>
+              <userId directory="http://scholar.google.com/citations?user=">0000-0002-2203-2076</userId>
+        <role>author</role>
+      </personnel>
+      <abstract>
+        <para>This dataset is the checklist of the native flowering species of the island of Mauritius, Indian Ocean. 
+</para>
+      </abstract>
+      <funding>
+        <para>BID Africa Call 2017, grant BID-AF2017-0316-SMA (https://www.gbif.org/project/aRCxBBF1BYU2C0us62ea4/getting-the-plants-to-all-dissemination-of-information-from-the-collection-of-the-mauritius-herbarium.)</para>
+      </funding>
+      <studyAreaDescription>
+        <descriptor name="generic"
+                    citableClassificationSystem="false">
+          <descriptorValue>Mauritius</descriptorValue>
+        </descriptor>
+      </studyAreaDescription>
+      <designDescription>
+        <description>
+          <para>Native flowering plants of the island of Mauritius, Indian Ocean.</para>
+        </description>
+      </designDescription>
+  </project>
+</dataset>
+  <additionalMetadata>
+    <metadata>
+      <gbif>
+          <dateStamp>2018-12-30T10:10:44.428+01:00</dateStamp>
+          <hierarchyLevel>dataset</hierarchyLevel>
+            <citation>Baider C (2018): Checklist of flowering plants of the island of Mauritius, Indian Ocean. v1.1. The Mauritius Herbarium. Dataset/Checklist. https://cloud.gbif.org/bid/resource?r=checklist_mau&amp;v=1.1</citation>
+          <bibliography>
+                <citation>Baker JG (1877) Flora of Mauritius and the Seychelles: a description of the flowering plants and ferns on those islands. London, L. Reeve and Co.
+
+Bojer W (1837) Hortus Mauritianus: ou énumération des plantes, exotiques et indigènes, qui croissent à l’Ile Maurice, disposées d’aprés la méthode naturelle. Mauritius, Imprimerie d’Aimé Mamarot et Compagnie.
+
+Bosser J,  Cadet T, Guého J and Marais W (1976-onwards) Flore des Mascareignes: La Réunion, Maurice, Rodrigues. 26 vols. Mauritius, Francce, MSIRI/Kew/ORSTOM-IRD.</citation>
+          </bibliography>
+          <dc:replaces>649fb99c-5bb1-4a3b-83df-7f9b3fe4dca6/v1.1.xml</dc:replaces>
+      </gbif>
+    </metadata>
+  </additionalMetadata>
+</eml:eml>
