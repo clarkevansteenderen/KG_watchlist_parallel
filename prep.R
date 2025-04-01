@@ -16,6 +16,7 @@ library(tidyr)
 library(readr)
 library(magrittr)
 library(dplyr)
+library(stringr)
 
 #################################################################
 ##                    READ INPUT FILE                          ##
@@ -27,17 +28,24 @@ colnames(input.params) = c("parameter", "choice")
 rownames(input.params) = input.params$parameter
 input.params = dplyr::select(input.params, !parameter)
 
+input.params$choice = trimws(input.params$choice)
+
+# read in iso country codes
+iso.codes = read.csv("iso_codes.csv")
+
 ####################################################################
 ##    extract  info from the user's input file                    ##
 ####################################################################
 
-iso.country.code = filter(input.params,
-                          row.names(input.params) %in% 
-                            c("ISO COUNTRY CODE"))$choice
-
 country.name = filter(input.params,
                           row.names(input.params) %in% 
                             c("TARGET COUNTRY"))$choice
+
+iso.country.code = iso.codes %>% 
+  dplyr::filter(stringr::str_detect(tolower(Name), tolower(country.name))) %>%
+  pull(Code)
+
+message(paste0("\n✔ THE COUNTRY CODE FOR ", country.name, " IS ", iso.country.code))
 
 # koppengeiger.zones = filter(input.params,
 #                             row.names(input.params) %in% 
@@ -46,11 +54,32 @@ country.name = filter(input.params,
 # koppengeiger.zones = as.numeric(unlist(strsplit(koppengeiger.zones, ",\\s*")))
 
 # high risk (HR) countries of interest (e.g. trading partners)
-HR.iso.country.code = filter(input.params,
+HR.iso.country = filter(input.params,
                             row.names(input.params) %in% 
                               c("HIGH RISK COUNTRY/IES"))$choice 
 
-HR.iso.country.code = unlist(strsplit(HR.iso.country.code, ",\\s*"))
+HR.iso.country = unlist(strsplit(HR.iso.country, ",\\s*"))
+
+get_country_code = function(country_name) {
+  match <- iso.codes %>%
+  dplyr::filter(stringr::str_detect(tolower(Name), tolower(country_name))) %>%
+    slice(1) %>%  # Take only the first match
+    pull(Code)
+  if (length(match) == 0) return("UNKNOWN") else return(match)
+}
+
+# Apply function to all country names
+HR.country.codes = purrr::map_chr(HR.iso.country, get_country_code)
+# remove any potential Unknown country acronyms
+HR.country.codes = HR.country.codes[HR.country.codes != "UNKNOWN"]
+
+# Combine into a data frame
+HR.results = data.frame(Country = HR.iso.country, ISO_Code = HR.country.codes)
+
+HR.iso.country.code = HR.results$ISO_Code
+
+message(paste0("\n✔ HIGH RISK COUNTRY ISO CODES ARE: ", 
+               paste(HR.iso.country.code, collapse = ", ")))
 
 gbif.username = filter(input.params,
                        row.names(input.params) %in% 
@@ -66,7 +95,7 @@ gbif.password = filter(input.params,
 
 #########################################################################
 ## GET THE KOPPEN GEIGER MAP, AND EXTRACT CLIMTATE TYPES FOR THE TARGET
-## COUNTRY
+## COUNTRY AUTOMATICALLLY
 #########################################################################
 
 kg_map <- terra::rast("koppen_geiger/Beck_KG_V1_present_0p0083.tif")
@@ -75,12 +104,13 @@ message("\n✔ READ IN KOPPEN-GEIGER SHAPE FILE...\n")
 # Set the CRS projection for the current climate layers 
 # - Use the correct wkt CRS format 
 terra::crs(kg_map) = "epsg:4326"
-terra::crs(kg_map, describe = T)
+terra::crs(kg_map, describe = TRUE)
 
 country = rnaturalearth::ne_countries(scale = "medium", country = country.name, returnclass = "sf")
 kg_country = terra::crop(kg_map, country)   # Crop to country extent
 kg_country = terra::mask(kg_country, country)  # Mask outside areas
 #terra::plot(kg_country, legend = TRUE)
+
 climate_types = unique(terra::values(kg_country), na.rm = TRUE)
 
 koppengeiger.zones = as.numeric(climate_types) %>%

@@ -39,13 +39,19 @@ run.folder = "OUTPUTS/PARAMETERS.csv"
 
 #########################################################################
 
-user.input = read.csv(run.folder)
+user.input = read.csv(run.folder) 
 
 iso.country.code = user.input$iso.country.code %>%
   purrr::keep(nzchar) # nzchar discards empty characters
 
+# high risk countries of interest (e.g. trading partners)
+HR.iso.country.code = user.input$HR.iso.country.code %>%
+  purrr::keep(nzchar) %>%
+  purrr::keep(~ !is.na(.))
+
 kopgeig.zone.nums = user.input$koppengeiger.zone.numbers %>%
-  purrr::keep(nzchar)
+  purrr::keep(nzchar) %>%
+  purrr::keep(~ !is.na(.))
 
 # user's input file
 input.params = read.delim("WATCHLIST_INPUT_FILE.txt", header = FALSE)
@@ -84,44 +90,23 @@ for(p in 1:length(chunk_files)){
   message(paste0("\nREADING IN GBIF DOWNLOAD CHUNK ", p, " OF ",
                  length(chunk_files), "\n"))
   
-  CHUNK.DATA = vroom::vroom(paste0("OUTPUTS/GBIF_DATA/", chunk_files[p]),
-                            col_select = c("order", "family", "species",
-                                           "scientificName", "countryCode", "speciesKey",
-                                           "decimalLatitude", "decimalLongitude"))
+  # CHUNK.DATA = vroom::vroom(paste0("OUTPUTS/GBIF_DATA/", chunk_files[p]),
+  #                           col_select = c("order", "family", "species",
+  #                                          "scientificName", "countryCode", "speciesKey",
+  #                                          "decimalLatitude", "decimalLongitude"))
   
-  # CHUNK.DATA = data.table::fread(paste0("OUTPUTS/GBIF_DATA/", chunk_files[p]), 
-  #             select = c("order", "family", "species", "scientificName", 
-  #                        "countryCode", "decimalLatitude", "decimalLongitude"))
+  # readr less likely to produce warnings, vroom has some issues
+  CHUNK.DATA = 
+    #readr::read_delim(file = "chunk_01.csv",
+    readr::read_delim(file = paste0("OUTPUTS/GBIF_DATA/", chunk_files[p]),
+                      col_select = c(order, family, species,
+                                     scientificName, countryCode, speciesKey,
+                                     decimalLatitude, decimalLongitude))
   
+  # CHUNK.DATA = CHUNK.DATA %>%
+  #   dplyr::filter(countryCode ==  c("BE", "HU"))
   
   message("\n✔ FILE READ IN SUCCESSFULLY")
-  
-  ##########################################################################
-  # Are any records already known from the target country?
-  ##########################################################################
-  
-  message("\n✔ CHECKING FOR RECORDS ALREADY IN ", target.country)
-  
-  # Set aside records from target country/ies for later 
-  target_records = CHUNK.DATA %>%
-    dplyr::select(
-      order,
-      family,
-      species,
-      scientific_name = scientificName,
-      country = countryCode,
-      lat = decimalLatitude,
-      lon = decimalLongitude
-    ) %>% 
-    # Remove records from target country/ies
-    dplyr::filter(country %in% iso.country.code)
-  
-  # Calculate if any records are already in target country/ies
-  target_records_2 = target_records %>%
-    dplyr::group_by(species, .drop = FALSE) %>%
-    dplyr::summarise(
-      n_records_in_target_countries = n()
-    )
   
   ##########################################################################
   # Koppen-Geiger analysis for global records 
@@ -139,7 +124,7 @@ for(p in 1:length(chunk_files)){
       lon = decimalLongitude
     ) %>%
     # Remove records from target country/ies
-    dplyr::filter(!country %in% iso.country.code )
+    dplyr::filter(!country %in% iso.country.code)
   
   message("\n✔ REMOVING RECORDS WITH MISSING GPS RECORDS...")
   
@@ -157,6 +142,54 @@ for(p in 1:length(chunk_files)){
   # as characters for some odd reason!
   df$lat = as.numeric(df$lat)
   df$lon = as.numeric(df$lon)
+  
+  ##########################################################################
+  # Are any records already known from the target country?
+  ##########################################################################
+  
+  message("\n✔ CHECKING FOR RECORDS ALREADY IN ", target.country)
+  
+  # Set aside records from target country/ies for later 
+  # note here that the input is df, not COMBO.DF
+  # df has all duplicate GPS points removed, while COMBO.DF has everything
+  # took a while to figure out that this was why the total_records_in_country
+  # e.g. total_records_in_ZA sometimes had more than the total_n value!
+  
+  target_records = df %>%
+    dplyr::filter(country %in% iso.country.code)
+  
+  # Calculate if any records are already in target country/ies
+  target_records_summed = target_records %>%
+    dplyr::group_by(species, .drop = FALSE) %>%
+    dplyr::summarise(
+      total_records_in_target_country = n()
+    )
+  
+  ##########################################################################
+  # Are any records from other high risk countries, as specified by user?
+  ##########################################################################
+  
+  if(length(HR.iso.country.code) > 0){
+    
+    HR.list = list()
+    
+    for(h in 1:length(HR.iso.country.code)){
+      
+      # here, df is also taken in rather than COMBO.DF
+      highriskcountry_records = df %>%
+        dplyr::filter(country %in% HR.iso.country.code[h])
+      
+      country.col.name = paste0("total_records_in_", HR.iso.country.code[h])
+      
+      HR.list[[h]] = highriskcountry_records %>%
+        dplyr::group_by(species, .drop = FALSE) %>%
+        dplyr::summarise(
+          !!sym(country.col.name) := n()
+        )
+      
+    }#for
+    
+  }#if
   
   message("\n✔ EXTRACTING CLIMATE AT GPS LOCALITIES...")
   
@@ -224,8 +257,19 @@ for(p in 1:length(chunk_files)){
   
   # Combine results with table with target country/ies records only 
   table =
-    dplyr::left_join(df_results, target_records_2, by = c("species")) %>%
-    tidyr::replace_na(list(n_records_in_target_countries = 0))
+    dplyr::left_join(df_results, target_records_summed, by = c("species")) 
+  
+  if(length(HR.iso.country.code) > 0){
+  # now add on the high risk country records
+    for(h in 1:length(HR.list)){
+      table = 
+        dplyr::left_join(table, HR.list[[h]], by = c("species")) 
+    }#for
+  }#if
+  
+  # replace all NAs with zeroes 
+  table = table %>%
+    dplyr::mutate_at(vars(contains("total_records_in_")), ~ replace_na(., 0))
   
   TABLE.LIST[[p]] = table
   
@@ -241,11 +285,9 @@ end_time = Sys.time()
 #########################################################################
 # Calculate the time taken
 #########################################################################
-time_taken = round(end_time - start_time, 2)
+message("TASK STARTED AT: \n", start_time, "\nTASK COMPLETED AT: \n",
+        end_time)
 #########################################################################
-message(paste0("\n✔ PROCESSING COMPLETED IN ", round(time_taken, 2), " MINUTES"))
-#########################################################################
-
 
 #########################################################################
 # Save table of results to file 
@@ -261,8 +303,8 @@ COMBO.DF = dplyr::bind_rows(TABLE.LIST)
 
 # group by species (sum up across all rows with the same species name)
 COMBO.DF = COMBO.DF %>%
-  group_by(species) %>%
-  summarise(across(!starts_with("prop_records"), sum))
+  dplyr::group_by(species) %>%
+  dplyr::summarise(across(!starts_with("prop_records"), sum))
 
 # create a copy for later
 COMBO.DF.SYN = COMBO.DF
@@ -270,7 +312,7 @@ COMBO.DF.SYN = COMBO.DF
 ##########################################################
 # FUNCTION TO GET KG PROPORTIONS 
 calc_proportions = function(DF){
-  
+
 # recalculate proportions
 total_cols = grep("^total_records_in_", names(DF), value = TRUE)
 prop_names = gsub("total", "prop", total_cols)
@@ -279,9 +321,10 @@ options(scipen=999)
 
 # calculate proportions in each KG zone
 prop_df = DF %>%
-  mutate(across(total_cols, ~ round(./total_n*100, 2))) %>%
-  rename_with(~prop_names, starts_with("total_records_in_")) %>%
-  select(!c(species, total_n, n_records_in_target_countries))
+  dplyr::mutate(across(all_of(total_cols), ~ round(./total_n * 100, 2))) %>%
+  #dplyr::mutate(across(total_cols, ~ round(./total_n*100, 2))) %>%
+  dplyr::rename_with(~prop_names, starts_with("total_records_in_")) %>%
+  dplyr::select(!c(species, total_n))
 
 return(dplyr::bind_cols(DF, prop_df)) 
 }
@@ -339,4 +382,4 @@ COMBO.DF.SYN = calc_proportions(COMBO.DF.SYN)
 write.csv(COMBO.DF.SYN, "OUTPUTS/GBIF_DATA/WATCHLIST_SYN_COLLATED.csv", 
           row.names = FALSE)
 
-message("\nWATCHLIST OUTPUT FILE WITH COLLATED SYNONYMS WRITTEN")
+message("\n✔✔ WATCHLIST OUTPUT FILE WITH COLLATED SYNONYMS WRITTEN ✔✔")
