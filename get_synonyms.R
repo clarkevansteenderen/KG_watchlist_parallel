@@ -52,6 +52,8 @@ colnames(input.params) = c("parameter", "choice")
 rownames(input.params) = input.params$parameter
 input.params = dplyr::select(input.params, !parameter)
 
+input.params$choice = trimws(input.params$choice)
+
 #################################################################
 
 message("\n✔ READING IN INVASIVE SPECIES...\n")
@@ -60,6 +62,12 @@ message("\n✔ READING IN INVASIVE SPECIES...\n")
 griis.full = readr::read_delim(filter(input.params,
                                       row.names(input.params) %in% 
                                         c("SPECIES LIST PATH"))$choice)
+
+# Filter rows where 'accepted_name.habitat' contains "terrestrial"
+# ie. remove all other habitat types
+griis.full = griis.full[grepl("terrestrial", griis.full$accepted_name.habitat), ]
+#griis.full$accepted_name.habitat = as.factor(griis.full$accepted_name.habitat)
+#levels(griis.full$accepted_name.habitat)
 
 # griis.plantae = griis.full %>% dplyr::filter(accepted_name.kingdom == "Plantae")
  

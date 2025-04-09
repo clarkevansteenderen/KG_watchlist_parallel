@@ -31,7 +31,7 @@ input.params = dplyr::select(input.params, !parameter)
 input.params$choice = trimws(input.params$choice)
 
 # read in iso country codes
-iso.codes = read.csv("iso_codes.csv")
+iso.codes = read.csv("iso_codes/iso_codes.csv")
 
 ####################################################################
 ##    extract  info from the user's input file                    ##
