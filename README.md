@@ -79,6 +79,7 @@ module load chpc/BIOMODULES R/4.2.0
 export LANG=en_US.UTF-8 
 export LC_ALL=en_US.UTF-8
 nohup Rscript get_synonyms.R &> get_synonyms.out &
+tail -f get_synonyms.out # to view the live log if desired (press ctrl + C to exit live log)
 Rscript prep.R       
 nohup Rscript KG_run_setup.R &> KG_run_setup.out &         
 ```
