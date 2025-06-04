@@ -64,29 +64,25 @@ shinyServer(function(session, input, output) {
     
     ######################################################################################
     # read in species list files for endemics, agricultural species, pests, etc.
-    output$file_inputs <- renderUI({
-      req(input$num_files)  # Ensure input exists
-      lapply(1:input$num_files, function(i) {
-        fileInput(paste0("file", i), paste("Upload Species File", i))
-      })
-    })
     
     output$column_selects <- renderUI({
-      req(input$num_files)
-      
-      lapply(1:input$num_files, function(i) {
-        file_data <- reactive({
-          req(input[[paste0("file", i)]])  # Ensure file is uploaded
-          df <- read.csv(input[[paste0("file", i)]]$datapath)  # Read the uploaded file
-          return(df)
-        })
+      req(input$files)
+      lapply(seq_along(input$files$name), function(i) {
+        file <- input$files[i, ]
+        ext <- tools::file_ext(file$name)
         
-        selectInput(
-          paste0("column", i), 
-          paste("Select Name Column from File", i),
-          choices = names(file_data()),  # Use column names as choices
-          selected = NULL
-        )
+        df <- tryCatch({
+          if (ext == "csv") readr::read_csv(file$datapath, show_col_types = FALSE)
+          else if (ext == "xlsx") readxl::read_excel(file$datapath)
+          else NULL
+        }, error = function(e) NULL)
+        
+        if (is.null(df)) return(NULL)
+        
+        selectInput(inputId = paste0("column", i),
+                    label = paste("Select column from:", file$name),
+                    choices = names(df),
+                    selected = NULL)
       })
     })
     
@@ -96,27 +92,30 @@ shinyServer(function(session, input, output) {
         paste0(input$combo_sp_file_name, ".csv")
       },
       content = function(file) {
-        all_data <- lapply(1:input$num_files, function(i) {
-          req(input[[paste0("file", i)]], input[[paste0("column", i)]])  # Ensure both file and column selection exist
+        req(input$files)
+        all_data <- lapply(seq_along(input$files$name), function(i) {
+          req(input[[paste0("column", i)]])
+          file <- input$files[i, ]
+          ext <- tools::file_ext(file$name)
           
-          df <- read.csv(input[[paste0("file", i)]]$datapath)  # Read the file
-          col_name <- input[[paste0("column", i)]]  # Get selected column
+          df <- if (ext == "csv") readr::read_csv(file$datapath, show_col_types = FALSE)
+          else if (ext == "xlsx") readxl::read_excel(file$datapath)
+          else NULL
+          
+          req(df)
+          col_name <- input[[paste0("column", i)]]
           
           df_selected <- df %>%
-            select(!!sym(col_name)) %>%  # Select only the chosen column
-            rename(Species = !!sym(col_name))  # Rename to "Species"
+            dplyr::select(!!rlang::sym(col_name)) %>%
+            dplyr::rename(Species = !!rlang::sym(col_name))
           
           return(df_selected)
         })
         
-        # Stack data correctly
-        if (input$num_files > 1) {
-          final_df <- dplyr::bind_rows(all_data)  # Combine all data
-        } else {
-          final_df <- all_data[[1]]  # Extract first dataframe if only one file
-        }
+        final_df <- dplyr::bind_rows(all_data) %>%
+          dplyr::mutate(Species = stringr::str_squish(Species)) %>%
+          dplyr::distinct(Species) 
         
-        # Write to temporary file
         write.csv(final_df, file, row.names = FALSE)
       }
     )#downloadhandler
@@ -139,6 +138,48 @@ shinyServer(function(session, input, output) {
     watchlist.data = read.csv(file1$datapath, na.strings = "")
     watchlist.data.sp.names = watchlist.data[1]
     watchlist.data.metrics = colnames(watchlist.data)[2:ncol(watchlist.data)]
+    
+    #############################################
+    # get summaries grouped by order and family
+    #############################################
+    total_cols <- grep("^total_records_in_", names(watchlist.data), value = TRUE)
+    prop_cols <- grep("^prop_records_in_", names(watchlist.data), value = TRUE)
+    
+    # Summarise by order
+    order_summary <- watchlist.data %>%
+      group_by(order) %>%  # Change to 'family' or c(order, family) if needed
+      summarise(
+        total_species = n_distinct(species),
+        total_n = sum(total_n, na.rm = TRUE),
+        across(all_of(total_cols), ~ sum(.x, na.rm = TRUE))
+      ) %>%
+      # STEP 3: Recalculate proportions using total_n
+      mutate(
+        across(
+          all_of(total_cols),
+          .fns = ~ round(.x / total_n * 100, 2),
+          .names = "prop_records_in_{str_replace(.col, 'total_records_in_', '')}"
+        )
+      )
+    
+    # Summarise by family
+    family_summary <- watchlist.data %>%
+      group_by(family, order) %>%  # Change to 'family' or c(order, family) if needed
+      summarise(
+        total_species = n_distinct(species),
+        total_n = sum(total_n, na.rm = TRUE),
+        across(all_of(total_cols), ~ sum(.x, na.rm = TRUE))
+      ) %>%
+      # STEP 3: Recalculate proportions using total_n
+      mutate(
+        across(
+          all_of(total_cols),
+          .fns = ~ round(.x / total_n * 100, 2),
+          .names = "prop_records_in_{str_replace(.col, 'total_records_in_', '')}"
+        )
+      )
+    
+    #############################################
     
     # update the drop-down selection menus to show the column names in the uploaded data
     #updateSelectInput(session,"col.species", choices=watchlist.data.sp.names) # first column with species names
@@ -176,10 +217,16 @@ shinyServer(function(session, input, output) {
       spp_plot <- reactive({
         
         # Filter for selected species
+        # df_filtered = watchlist.data %>%
+        #   filter(!!sym(colnames(watchlist.data)[1]) %in% req(input$col.species)) %>%
+        #   pivot_longer(cols = all_of(req(input$col.metrics)), names_to = "Metric", values_to = "Value") %>%
+        #   rename(Species = !!sym(colnames(watchlist.data)[1])) %>%  # Rename first column to "Species"
+        #   mutate(Metric = factor(Metric, levels = unique(Metric)))
+        
         df_filtered = watchlist.data %>%
-          filter(!!sym(colnames(watchlist.data)[1]) %in% req(input$col.species)) %>%
+          filter(species %in% req(input$col.species)) %>%
           pivot_longer(cols = all_of(req(input$col.metrics)), names_to = "Metric", values_to = "Value") %>%
-          rename(Species = !!sym(colnames(watchlist.data)[1])) %>%  # Rename first column to "Species"
+          rename(Species = species) %>%
           mutate(Metric = factor(Metric, levels = unique(Metric)))
         
         # Plot grouped bars for multiple species
@@ -336,8 +383,102 @@ shinyServer(function(session, input, output) {
       
     }) #observeEvent(input$plot_thresholded_spp, {
     
+    #######################################################################################################################
+    # Summary statistics from WatchlistR output: look at Taxonomic groups
+    # Order and Family
+    #######################################################################################################################
+    
+    observeEvent(input$plot_taxonomic_summary, {
+      
+      # Make the plot a reactive expression
+      taxa_plot <- reactive({
+        
+        # Plot 
+        
+        input_taxa_data <- switch(input$taxonomic_grouping,
+                             "Order" = order_summary,
+                             "Family" = family_summary)
+        
+        group_col <- switch(input$taxonomic_grouping,
+                            "Order" = "order",
+                            "Family" = "family")
+        
+        plot = input_taxa_data %>%
+          arrange(desc(prop_records_in_kg)) %>%
+          ggplot(aes(x = reorder(!!sym(group_col), prop_records_in_kg), 
+                     y = prop_records_in_kg)) +
+          geom_bar(stat = "identity", fill = input$taxon_summary_colour, 
+                   alpha = input$taxon_summary_alpha,
+                   color = if (input$taxon_summary_add_border) "black" else NA) +
+          coord_flip() +
+          scale_y_continuous(
+            limits = c(0, 100),
+            breaks = seq(0, 100, by = 10)
+          ) +
+          labs(
+            x = input$taxon_summary_ylab,
+            y = input$taxon_summary_xlab, 
+            title = ""
+          ) +
+          ggthemes[[input$taxon_summary_ggtheme]] +
+          theme(
+            axis.text.x = element_text(angle = req(input$taxon_summary_label_orient), 
+                                       hjust = 1),
+            axis.text = element_text(colour = "black"),
+            axis.text.y = element_text(colour = "black", size = input$taxon_label_size),
+            axis.title.x = element_text(margin = unit(c(2, 0, 0, 0), "mm"), size = 14),
+            axis.title.y = element_text(margin = unit(c(0, 4, 0, 0), "mm"), size = 14),
+            legend.text = element_text(size = 12)
+          )
+        
+        plot
+      })
+      
+      # Render the plot
+      output$taxon_summary_plot <- renderPlot({
+        taxa_plot()
+      })
+      
+      #############
+      # Download
+      #############
+      output$downloadplot_taxon_summary <- downloadHandler(
+        filename = function () {
+          paste(input$file_name_taxon_summary_plot, 
+                input$plot_format_taxon_summary, sep = '.')
+        },
+        content = function(file) {
+          
+          width = as.numeric(input$w_taxon_summary_plot)
+          height = as.numeric(input$h_taxon_summary_plot)
+          dpi = as.numeric(input$res_taxon_summary_plot)
+          units = input$unit_taxon_summary_plot
+          
+          # Save the plot using ggsave
+          ggsave(file, plot = taxa_plot(), width = width, height = height, dpi = dpi, units = units)
+        } 
+      )#output$downloadplot_taxon_summary <- downloadHandler(
+      
+      # Download data sheets
+      output$download_taxon_summary_data = downloadHandler(
+        filename = function() {
+          paste("taxon_summary_", Sys.Date(), ".xlsx", sep = "")
+        },
+        content = function(file) {
+          writexl::write_xlsx(
+            list(
+              Order_Summary = order_summary,
+              Family_Summary = family_summary
+            ),
+            path = file
+          )
+        }
+      )#output$download_taxon_summary_data = downloadHandler(
+      
+    }) #observeEvent(input$plot_taxonomic_summary, {
     
   }) # end of first observe
+  
   
   #######################################################################################################################
   # Do the following when the "Upload" button is clicked

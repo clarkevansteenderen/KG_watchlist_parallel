@@ -30,6 +30,9 @@ library(stringdist)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(terra)
+library(readxl)
+library(stringr)
+library(writexl)
 
 ggthemes = list("Classic" = ggplot2::theme_classic(),
                 "Dark" = ggplot2::theme_dark(),
@@ -149,13 +152,15 @@ shinyUI(fluidPage(
                                 br(),
                                 h4(icon("circle", style = "color: royalblue;", size = "1x"), strong("Species Files to remove")),
                                 h5(strong("E.g. endemics, pests, agricultural crops")),
-                                numericInput("num_files", "Number of files to upload:", 1, min = 1, max = 15),
-                                uiOutput("file_inputs"),  # Placeholder for dynamically generated file inputs
-                                uiOutput("column_selects"),  # UI placeholder for column dropdowns
-                                br(),
-                                textInput("combo_sp_file_name", "File Name for Combined List:", value = "exclude/combined_species_to_remove"),
+                                #numericInput("num_files", "Number of files to upload:", 1, min = 1, max = 15),
+                                #uiOutput("file_inputs"),  # Placeholder for dynamically generated file inputs
+                                #uiOutput("column_selects"),  # UI placeholder for column dropdowns
+                                fileInput("files", "Upload one or more files", accept = c(".csv", ".xlsx"), multiple = TRUE),
+                                uiOutput("column_selects"),  # Dynamically create column selectors for each uploaded file
                                 br(),
                                 downloadButton("download_combined_files", "Combine and Download", style="color: #fff; background-color: darkblue; border-color: white; font-size:120%"),
+                                br(), br(),
+                                textInput("combo_sp_file_name", "File Name for Combined List:", value = "exclude/combined_species_to_remove"),
                                 br(), br(),
                                 h4(icon("circle", style = "color: royalblue;", size = "1x"), strong("List of GRIIS species to check through")),
                                 h5(strong("Global Register of Introduced and Invasive Species")),
@@ -307,11 +312,8 @@ shinyUI(fluidPage(
                          column(3,
                                 h4(icon("circle", "fa-solid", style = "color: darkgreen;", size = "2x"), strong("2. Customise")),
                                 br(), 
-                                
                                 selectInput("spp_ggtheme", "Select ggplot Theme:", choices = names(ggthemes), selected = ggthemes["Classic"]),
                                 selectInput("spp_legend_pos", "Legend Position:", choices = c("top", "right", "bottom", "left", "none"), selected = "top", width = "50%"),
-                                selectInput("spp_ggtheme", "Select ggplot Theme:", choices = names(ggthemes), selected = ggthemes["Classic"], width = "50%"),
-                                
                                 br(),
                                 
                          ), #column 4
@@ -371,7 +373,7 @@ shinyUI(fluidPage(
               ############################################################################################################
               
               tabPanel(
-                strong(icon("leaf", class = "fa-solid", style = "color: black;"), "SUMMARIES"),
+                strong(icon("leaf", class = "fa-solid", style = "color: black;"), "SUMMARY 1"),
                 br(), br(),
                 
                 # Explanation Box
@@ -399,7 +401,7 @@ shinyUI(fluidPage(
                 ),
                 column(3,
                        textInput("summary_xlab", "x-axis label:", value = "Species"),
-                       textInput("summary_ylab", "y-axis label:", value = "Number"),
+                       textInput("summary_ylab", "y-axis label:", value = "Proportion of Records (%)"),
                        #checkboxInput("summary_add_border", "Add borders around bars?", value = TRUE),
                        numericInput("summary_label_orient", "x-axis label orientation:", min = -360, max = 360, value = 0, width = "50%")
                 ),
@@ -444,6 +446,89 @@ shinyUI(fluidPage(
                     ),
                     column(width = 2,
                            downloadButton("download_summary_data", "Download Threshold Data", style = "color: black; background-color: lightgrey; border-color: black; font-size:100%")
+                    )
+                  )#fluidRow
+                )
+                
+              ), # End tabPanel
+              
+              ############################################################################################################
+              # VISUALISE SUMMARIES TAB PANEL
+              ############################################################################################################
+              
+              tabPanel(
+                strong(icon("leaf", class = "fa-solid", style = "color: black;"), "SUMMARY 2"),
+                br(), br(),
+                
+                # Explanation Box
+                tags$div(
+                  style = "background-color: lightsteelblue; padding: 10px;",
+                  tags$strong(
+                    icon("lightbulb", class = "fa-solid", style = "color: yellow;"),
+                    " Explanation here",
+                    style = "color: black;"
+                  )
+                ),
+                br(), br(),
+                
+                # Input Fields
+                fluidRow(column(3,
+                        selectInput("taxonomic_grouping", "Select Taxonomic Level:", choices = c("Family", "Order"), selected = "Family"),
+                        selectInput("taxon_summary_colour", "Select colours:", choices = c(colors()), selected = "forestgreen"),
+                        checkboxInput("taxon_summary_add_border", "Add borders around bars?", value = FALSE)
+                ),
+                column(3,
+                       numericInput("taxon_label_size", "Label Size:", min = 1, max = 20, value = 10, width = "50%"),
+                       sliderInput("taxon_summary_alpha", "Colour Transparency:", min = 0, max = 1, value = 0.65, width = "50%"),
+                       selectInput("taxon_summary_ggtheme", "Select ggplot Theme:", choices = names(ggthemes), selected = ggthemes["Classic"]),
+                       ),
+                column(3,
+                       textInput("taxon_summary_xlab", "x-axis label:", value = "Proportion of Records in KG (%)"),
+                       textInput("taxon_summary_ylab", "y-axis label:", value = "Taxonomic Group"),
+                       #checkboxInput("taxon_summary_add_border", "Add borders around bars?", value = TRUE),
+                       numericInput("taxon_summary_label_orient", "x-axis label orientation:", min = -360, max = 360, value = 0, width = "50%")
+                ),
+                column(3,
+                       actionButton("plot_taxonomic_summary", "PLOT", style="color: #fff; background-color: darkblue; border-color: white; font-size:120%",  icon("check")),
+                ),
+                ), # End fluidRow
+                br(),br(),
+                plotOutput("taxon_summary_plot", width = 800, height = 550), 
+                br(),br(),
+                
+                # Plot download options
+                h3(strong("DOWNLOAD")),
+                wellPanel(
+                  
+                  textInput("file_name_taxon_summary_plot", "File name: ", "taxon_summary_plot"),
+                  
+                  fluidRow(
+                    column(width = 2,
+                           selectInput("plot_format_taxon_summary", "Image format:", choices = c("pdf", "png", "svg"), width = "150px")
+                    ),
+                    column(width = 2,
+                           textInput("w_taxon_summary_plot", "Width: ", 20, width = "150px")
+                    ),
+                    column(width = 2,
+                           textInput("h_taxon_summary_plot", "Height: ", 15, width = "150px")
+                    ),
+                    column(width = 2,
+                           selectInput("unit_taxon_summary_plot", "Unit: ", choices = c("cm", "in"), width = "150px")
+                    ),
+                    column(width = 2,
+                           conditionalPanel(
+                             condition = "input.plot_format_taxon_summary == 'png'",
+                             textInput("res_taxon_summary_plot", "Res (dpi): ", 300, width = "150px")
+                           )
+                    )
+                  ),
+                  
+                  fluidRow(
+                    column(width = 2,
+                           downloadButton("downloadplot_taxon_summary", "Download Plot", style = "color: black; background-color: lightgrey; border-color: black; font-size:100%"),
+                    ),
+                    column(width = 2,
+                           downloadButton("download_taxon_summary_data", "Download Data Sheets", style = "color: black; background-color: lightgrey; border-color: black; font-size:100%")
                     )
                   )#fluidRow
                 )
