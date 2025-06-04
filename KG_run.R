@@ -97,7 +97,7 @@ for(p in 1:length(chunk_files)){
   
   # readr less likely to produce warnings, vroom has some issues
   CHUNK.DATA = 
-    #readr::read_delim(file = "chunk_01.csv",
+    #readr::read_delim(file = "OUTPUTS/chunk_01.csv",
     readr::read_delim(file = paste0("OUTPUTS/GBIF_DATA/", chunk_files[p]),
                       col_select = c(order, family, species,
                                      scientificName, countryCode, speciesKey,
@@ -160,7 +160,7 @@ for(p in 1:length(chunk_files)){
   
   # Calculate if any records are already in target country/ies
   target_records_summed = target_records %>%
-    dplyr::group_by(species, .drop = FALSE) %>%
+    dplyr::group_by(order, family, species, .drop = FALSE) %>% # added: order, family,
     dplyr::summarise(
       total_records_in_target_country = n()
     )
@@ -182,7 +182,7 @@ for(p in 1:length(chunk_files)){
       country.col.name = paste0("total_records_in_", HR.iso.country.code[h])
       
       HR.list[[h]] = highriskcountry_records %>%
-        dplyr::group_by(species, .drop = FALSE) %>%
+        dplyr::group_by(order, family, species, .drop = FALSE) %>%
         dplyr::summarise(
           !!sym(country.col.name) := n()
         )
@@ -224,7 +224,7 @@ for(p in 1:length(chunk_files)){
   # Calculate total GPS records within 
   # target country/ies KG zones
   df_results = data_kg %>%
-    dplyr::group_by(species) %>%
+    dplyr::group_by(order, family, species) %>%
     dplyr::summarise(
       # Total GBIF records 
       total_n = n(), 
@@ -238,7 +238,7 @@ for(p in 1:length(chunk_files)){
   
   for (num in kopgeig.zone.nums) {
     zone_summary = data_kg %>%
-      group_by(species) %>%
+      group_by(order, family, species) %>%
       summarise(
         !!paste0("total_records_in_", num) := sum(kg_zone == num),
         !!paste0("prop_records_in_", num) := round(sum(kg_zone == num) / n() * 100, digits = 3),
@@ -252,18 +252,19 @@ for(p in 1:length(chunk_files)){
   
   for (zone_summary in zone_summary_list) {
     df_results = df_results %>%
-      left_join(zone_summary, by = "species")
+      #left_join(zone_summary, by = "species")
+      left_join(zone_summary, by = c("order", "family", "species"))
   }#for
   
   # Combine results with table with target country/ies records only 
   table =
-    dplyr::left_join(df_results, target_records_summed, by = c("species")) 
+    dplyr::left_join(df_results, target_records_summed, by = c("order", "family", "species")) 
   
   if(length(HR.iso.country.code) > 0){
   # now add on the high risk country records
     for(h in 1:length(HR.list)){
       table = 
-        dplyr::left_join(table, HR.list[[h]], by = c("species")) 
+        dplyr::left_join(table, HR.list[[h]], by = c("order", "family", "species")) 
     }#for
   }#if
   
@@ -303,7 +304,7 @@ COMBO.DF = dplyr::bind_rows(TABLE.LIST)
 
 # group by species (sum up across all rows with the same species name)
 COMBO.DF = COMBO.DF %>%
-  dplyr::group_by(species) %>%
+  dplyr::group_by(order, family, species) %>%
   dplyr::summarise(across(!starts_with("prop_records"), sum))
 
 # create a copy for later
@@ -321,10 +322,11 @@ options(scipen=999)
 
 # calculate proportions in each KG zone
 prop_df = DF %>%
+  dplyr::ungroup() %>%  
   dplyr::mutate(across(all_of(total_cols), ~ round(./total_n * 100, 2))) %>%
   #dplyr::mutate(across(total_cols, ~ round(./total_n*100, 2))) %>%
   dplyr::rename_with(~prop_names, starts_with("total_records_in_")) %>%
-  dplyr::select(!c(species, total_n))
+  dplyr::select(-order, -family, -species, -total_n)
 
 return(dplyr::bind_cols(DF, prop_df)) 
 }
@@ -349,7 +351,8 @@ message("\n✔ COLLATING TAXONOMIC SYNONYMS...")
 ORIGINAL.INPUT = read.csv("OUTPUTS/FILTERED_SYNONYMS_INC_INPUT_DATA.csv")
 # keep just the important columns
 ORIGINAL.INPUT.selected = dplyr::select(ORIGINAL.INPUT,
-                                        c(status, species, original.input.sp))
+                                        c(status, species, 
+                                          original.input.sp))
 
 # replace species names with their synonym
 for(p in 1:nrow(COMBO.DF.SYN)){
@@ -367,7 +370,7 @@ for(p in 1:nrow(COMBO.DF.SYN)){
 # COMBO.DF contains all species, including synonyms
 # COMBO.DF.SYN contains less, since synonyms were merged
 COMBO.DF.SYN = COMBO.DF.SYN %>%
-  group_by(species) %>%
+  group_by(order, family, species) %>%
   summarize(across(everything(), sum))
 
 message("\n✔ CALCULATING PROPORTIONS PER KG ZONE...")
