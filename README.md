@@ -144,33 +144,19 @@ Ensure that you are running this R script on a computer that has an uninterrupte
 
 ## Input file
 
-Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list CSV file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure that the same requirements are met for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything - as long as the relevant data is available at the specified path. 
-
-### Template WATCHLIST_INPUT_FILE.txt
-
-``SPECIES LIST PATH``	path/to/invasive_species_list.csv    
-``ENDEMICS LIST PATH``	path/to/list_of_endemics.txt        
-``TARGET COUNTRY``	country    
-``KINGDOM``	taxonomic kingdom   
-``ISO COUNTRY CODE``	country code (see ISO codes below)          
-``SPECIES NAME COLUMN``	column in invasive species list specifying full taxonomic name (genus and species)       
-``ENDEMICS NAME COLUMN``	column in endemic species list specifying full taxonomic name (genus and species)           
-``GBIF USERNAME``	    
-``GBIF EMAIL``	    
-``GBIF PASSWORD``	    
+Below is an example of the **``WATCHLIST_INPUT_FILE.txt``** file that the user needs to create (using the associated Shiny app) or edit accordingly. The name **WATCHLIST_INPUT_FILE** should not be changed, and neither should any of the parameters in capital letters in the file. Check the species list CSV file for the project to ensure the correct usage of the target country and taxonomic kingdom, and make sure that there is a single column in the file with both the genus and species name (no authority or other detail); for example ``Acacia saligna``, or ``Opuntia stricta``. The column name can be anything - here it is set to ``accepted_name.species``. Ensure that the same requirements are met for the file containing endemic species (if available); here it is ``full.tax.name``. If a list of endemics is not available, leave ``ENDEMICS LIST PATH`` and ``ENDEMICS NAME COLUMN`` blank. Enter the applicable Köppen-Geiger zones as numbers (see below for codes), separated by a comma. The file paths provided can be anything - as long as the relevant data is available at the specified path. 
 
 ### Example WATCHLIST_INPUT_FILE.txt
 
-``SPECIES LIST PATH``	griis_data/griis_full_database.csv    
-``ENDEMICS LIST PATH``	mau_endemics/native_flowering_plants_mau.txt        
-``TARGET COUNTRY``	Mauritius    
-``KINGDOM``	Plantae    
-``ISO COUNTRY CODE``	MU    
-``SPECIES NAME COLUMN``	accepted_name.species    
-``ENDEMICS NAME COLUMN``	full.tax.name    
-``GBIF USERNAME``	gbifuser123    
-``GBIF EMAIL``	johndoe@gmail.com    
-``GBIF PASSWORD``	*** 		      
+SPECIES LIST PATH	 griis_data/griis_full_database.csv    
+SPECIES NAME COLUMN	 accepted_name.species    
+TARGET COUNTRY	 Mauritius    
+KINGDOM	 Animalia    
+SPECIES TO EXCLUDE PATH	 exclude/combined_species_to_remove_animals.csv    
+HIGH RISK COUNTRY/IES	 India, China, South Africa, Malaysia, United Arab Emirates, France, Indonesia, Kenya    
+GBIF USERNAME	 johndoe123    
+GBIF EMAIL	 johndoe@gmail.com    
+GBIF PASSWORD	 ***	        
 
 ## 🐛 SPECIES LIST PATH -> the list of invasive species of interest
 
