@@ -154,8 +154,7 @@ Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file 
 ``KINGDOM``	taxonomic kingdom   
 ``ISO COUNTRY CODE``	country code (see ISO codes below)          
 ``SPECIES NAME COLUMN``	column in invasive species list specifying full taxonomic name (genus and species)       
-``ENDEMICS NAME COLUMN``	column in endemic species list specifying full taxonomic name (genus and species)    
-``KOPPEN-GEIGER ZONES``	koppen-geiger zone numbers (see table below), separated by a comma       
+``ENDEMICS NAME COLUMN``	column in endemic species list specifying full taxonomic name (genus and species)           
 ``GBIF USERNAME``	    
 ``GBIF EMAIL``	    
 ``GBIF PASSWORD``	    
@@ -169,7 +168,6 @@ Below is a template and an example of the **``WATCHLIST_INPUT_FILE.txt``** file 
 ``ISO COUNTRY CODE``	MU    
 ``SPECIES NAME COLUMN``	accepted_name.species    
 ``ENDEMICS NAME COLUMN``	full.tax.name    
-``KOPPEN-GEIGER ZONES``	1, 2, 3, 14    
 ``GBIF USERNAME``	gbifuser123    
 ``GBIF EMAIL``	johndoe@gmail.com    
 ``GBIF PASSWORD``	*** 		      
