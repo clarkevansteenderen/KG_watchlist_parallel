@@ -73,7 +73,7 @@ An example of the console input on the globus node (for Internet access) could b
 
 ```
 ssh cvansteenderen@globus.chpc.ac.za
-Cryophytum2024@!
+PASSWORD    
 cd /mnt/lustre/users/cvansteenderen/kg_watchlist_PROJECT1
 module load chpc/BIOMODULES R/4.2.0
 export LANG=en_US.UTF-8 
@@ -89,7 +89,7 @@ Followed by the last two scripts on the normal HPC node:
 
 ```
 ssh cvansteenderen@lengau.chpc.ac.za      
-Cryophytum2024@!
+PASSWORD    
 cd /mnt/lustre/users/cvansteenderen/kg_watchlist_PROJECT1       
 qsub split_gbif.job              
 qsub KG_run.job    
