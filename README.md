@@ -29,8 +29,8 @@ The ``WatchListR`` pipeline is targeted to any country of interest, and uses a g
 ## Run instructions (Linux environment)
 
 * Download this GitHub repository, and unzip the project folder
-* Run the [watchlistR](https://clarkevansteenderen.shinyapps.io/watchlistR/) application to generate the **``WATCHLIST_INPUT_FILE.txt``** input file
-* Edit the **split_gbif.sh** files according to the specific project requirements    
+* Run the [watchlistR](https://clarkevansteenderen.shinyapps.io/watchlistR/) **R Shiny** application to generate the **``WATCHLIST_INPUT_FILE.txt``** input file
+* Edit the **split_gbif.job** files according to the specific project requirements    
 * Upload the project folder to your profile on a High Performance Computer (HPC) of choice
 * Access a node of the HPC that has access to the Internet (since GBIF downloads require an Internet connection), e.g ``ssh cvansteenderen@globus.chpc.ac.za``
 * cd (change the directory) to the relevant folder/directory on your HPC profile
